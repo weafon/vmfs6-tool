@@ -52,21 +52,21 @@ struct vmfs_volinfo_raw {
    sizeof(((struct vmfs_volinfo_raw *)(0))->name)
 
 /* === LVM Info === */
-#define VMFS_LVMINFO_OFFSET            0x0200
+#define VMFS_LVMINFO_OFFSET           0x1000 // weafonvmfs6 0x0200
 
 struct vmfs_lvminfo_raw {
    uint64_t size;
    uint64_t blocks; /* Seems to always be sum(num_segments for all extents) +
                     * num_extents */
-   uint32_t _unknown0;
-   char uuid_str[35];
+   uint32_t _unknown0; // 0x10
+   char uuid_str[35]; // 0x14
    u_char _unknown1[29];
-   uuid_t uuid;
-   uint32_t _unknown2;
-   uint64_t ctime; /* ctime? in usec */
-   uint32_t _unknown3;
+   uuid_t uuid; // 0x54
+   uint32_t _unknown2; //0x64
+   uint64_t ctime; /* ctime? in usec */ //0x68
+   uint32_t _unknown3; //0x70
    uint32_t num_segments;
-   uint32_t first_segment;
+   uint32_t first_segment; //weafon
    uint32_t _unknown4;
    uint32_t last_segment;
    uint32_t _unknown5;

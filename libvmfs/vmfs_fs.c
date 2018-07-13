@@ -165,6 +165,8 @@ static int vmfs_read_fdc_base(vmfs_fs_t *fs)
     * When blocksize = 8 Mb, there is free space between heartbeats
     * and FDC.
     */
+   printf("VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE = %d blocksize %d\n", 
+   	VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE, vmfs_fs_get_blocksize(fs));
    fdc_base = m_max(1, (VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE) /
                     vmfs_fs_get_blocksize(fs));
 
