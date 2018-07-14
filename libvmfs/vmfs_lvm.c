@@ -65,7 +65,7 @@ static inline ssize_t vmfs_lvm_io(const vmfs_lvm_t *lvm,off_t pos,u_char *buf,
       fprintf(stderr,"VMFS: i/o spanned over several extents is unsupported\n");
       return(-1);
    }
-	printf("%s : pos %ld len %ld\n", __FUNCTION__, pos, len);
+	printf("%s : pos 0x%lx len %ld\n", __FUNCTION__, pos, len);
    return(func(&extent->dev,pos,buf,len));
 }
 
