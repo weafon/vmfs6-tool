@@ -334,7 +334,6 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
    /* Allocate a temporary buffer and copy result to user buffer */
    if (!(tmpbuf = iobuffer_alloc(n_clen)))
       return(-1);
-
 	printf("%s: fb_item %d n_offset %lu sz %lu\n", __FUNCTION__, fb_item, n_offset, n_clen);
    if (vmfs_fs_read(fs,fb_item,n_offset,tmpbuf,n_clen) != n_clen) {
       iobuffer_free(tmpbuf);
