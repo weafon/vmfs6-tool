@@ -35,7 +35,7 @@ static ssize_t vmfs_vol_read(const vmfs_device_t *dev,off_t pos,
                              u_char *buf,size_t len)
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
-   pos += vol->vmfs_base + 0x1000000;
+   pos += vol->vmfs_base + 0x1000000; //weafonvmfs6 0x1000000;
 
    return(m_pread(vol->fd,buf,len,pos));
 }
@@ -45,7 +45,7 @@ static ssize_t vmfs_vol_write(const vmfs_device_t *dev,off_t pos,
                               const u_char *buf,size_t len)
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
-   pos += vol->vmfs_base + 0x1000000;
+   pos += vol->vmfs_base + 0x1000000; //weafonvmfs6 0x1000000;
 
    return(m_pwrite(vol->fd,buf,len,pos));
 }

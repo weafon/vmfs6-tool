@@ -41,6 +41,7 @@ static inline void vmfs_inode_write_blk_id(u_char *buf,u_int index,
 static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 {
    int i;
+   printf("%s called buf %p magic %x\n", __FUNCTION__, buf, inode->mdh.magic);      
 
    vmfs_metadata_hdr_read(&inode->mdh,buf);
 
@@ -49,6 +50,7 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    inode->id        = read_le32(buf,VMFS_INODE_OFS_ID);
    inode->id2       = read_le32(buf,VMFS_INODE_OFS_ID2);
+   printf("metadata done for inode id %d\n", inode->id);      
    inode->nlink     = read_le32(buf,VMFS_INODE_OFS_NLINK);
    inode->type      = read_le32(buf,VMFS_INODE_OFS_TYPE);
    inode->flags     = read_le32(buf,VMFS_INODE_OFS_FLAGS);
@@ -67,6 +69,7 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    /* "corrected" mode */
    inode->cmode    = inode->mode | vmfs_file_type2mode(inode->type);
+   printf("metadata done for inode type %d\n", inode->type);   
 
    if (inode->type == VMFS_FILE_TYPE_RDM) {
       inode->rdm_id = read_le32(buf,VMFS_INODE_OFS_RDM_ID);

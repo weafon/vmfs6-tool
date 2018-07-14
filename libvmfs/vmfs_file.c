@@ -59,7 +59,7 @@ vmfs_file_t *vmfs_file_open_from_inode(const vmfs_inode_t *inode)
 vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id)
 {
    vmfs_inode_t *inode;
-
+	printf("%s: blk_id 0x%x\n", __FUNCTION__, blk_id);
    if (!(inode = vmfs_inode_acquire(fs,blk_id)))
       return NULL;
 
