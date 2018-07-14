@@ -38,7 +38,7 @@ struct vmfs_bitmap_header {
 };
 
 /* === Bitmap entry === */
-#define VMFS_BITMAP_ENTRY_SIZE    0x400
+#define VMFS_BITMAP_ENTRY_SIZE    0x2000 //weafonvmfs6 0x400
 
 #define VMFS_BITMAP_BMP_MAX_SIZE  0x1f0
 
