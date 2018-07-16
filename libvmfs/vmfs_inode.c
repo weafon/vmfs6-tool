@@ -28,22 +28,26 @@
 
 static inline uint32_t vmfs_inode_read_blk_id(const u_char *buf,u_int index)
 {
-   return(read_le32(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(uint32_t))));
+//   return(read_le32(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(uint32_t))));
+	return(read_le32(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(struct sblkloc))+sizeof(uint32_t))>>19);
+
 }
 
 static inline void vmfs_inode_write_blk_id(u_char *buf,u_int index,
                                            uint32_t blk_id)
 {
-   write_le32(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(uint32_t)),blk_id);
+//   write_le32(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(uint32_t)),blk_id);
+   write_le32(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(struct sblkloc))+sizeof(uint32_t),blk_id);
+
 }
 
 /* Read an inode */
 static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 {
    int i;
+   vmfs_metadata_hdr_read(&inode->mdh,buf);
    printf("%s called buf %p magic %x\n", __FUNCTION__, buf, inode->mdh.magic);      
 
-   vmfs_metadata_hdr_read(&inode->mdh,buf);
 
    if (inode->mdh.magic != VMFS_INODE_MAGIC)
       return(-1);
@@ -76,8 +80,14 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
    } else if (inode->zla == VMFS5_ZLA_BASE + VMFS_BLK_TYPE_FD) {
       memcpy(inode->content, buf + VMFS_INODE_OFS_CONTENT, inode->size);
    } else {
+      printf("file id %d off %ld blk:", inode->id, 
+      	VMFS_INODE_OFS_BLK_ARRAY);
       for(i=0;i<VMFS_INODE_BLK_COUNT;i++)
+      {
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
+	      printf("%d:0x%x ", i, inode->blocks[i]);      	         
+       }
+       printf("\n");
    }
 
    return(0);

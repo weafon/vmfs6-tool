@@ -54,6 +54,7 @@ const vmfs_dirent_t *vmfs_dir_lookup(vmfs_dir_t *d,const char *name)
    vmfs_dir_seek(d,0);
 
    while((rec = vmfs_dir_read(d))) {
+//   		printf("%s : cmp rec %s to %s\n", __FUNCTION__, rec->name, name);
       if (!strcmp(rec->name,name))
          return(rec);
    }
@@ -99,6 +100,7 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
    int close_dir = 0;
    const vmfs_fs_t *fs = vmfs_dir_get_fs(base_dir);
    uint32_t ret = 0;
+   printf("%s : look for file %s\n", __FUNCTION__, path);
 
    cur_dir = base_dir;
 
@@ -115,7 +117,7 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
    ret = rec->block_id;
 
    nam = ptr = strdup(path);
-   
+	printf("%s : start to search %s\n", __FUNCTION__, path);
    while(*ptr != 0) {
       sl = strchr(ptr,'/');
 

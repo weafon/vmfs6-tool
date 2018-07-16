@@ -181,6 +181,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
       blk_type = VMFS_BLK_FB_TBZ(blk_id) ?
                     VMFS_BLK_TYPE_NONE : VMFS_BLK_TYPE(blk_id);
+	  printf("%s : call for pos %d , got blk_id %u type %u\n", __FUNCTION__, pos, blk_id, blk_type);
 
       switch(blk_type) {
          /* Unallocated block */

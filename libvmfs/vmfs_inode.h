@@ -25,29 +25,35 @@
 #define VMFS_INODE_BLK_COUNT      0x100
 
 #define VMFS_INODE_MAGIC  0x10c00001
-
+struct sblkloc
+{
+	uint32_t unknown;
+	uint32_t blocks;
+} __attribute__((packed));
 struct vmfs_inode_raw {
    struct vmfs_metadata_hdr_raw mdh;
    uint32_t id;
    uint32_t id2;              /* seems to be VMFS_BLK_FD_ITEM(id) + 1 */
    uint32_t nlink;
    uint32_t type;
-   uint32_t flags;
-   uint64_t size;
-   uint64_t blk_size;
-   uint64_t blk_count;
-   uint32_t mtime;
-   uint32_t ctime;
+   uint32_t flags; //0x10
+   uint64_t size; //0x14
+   uint64_t blk_size; //0x1c
+   uint64_t blk_count; //0x24
+   uint32_t mtime; //0x2c
+   uint32_t ctime; //0x30
    uint32_t atime;
-   uint32_t uid;
+   uint32_t uid; 
    uint32_t gid;
-   uint32_t mode;
+   uint32_t mode; //0x40
    uint32_t zla;
-   uint32_t tbz;
-   uint32_t cow;
+   uint32_t tbz; 
+   uint32_t cow; 
    u_char _unknown2[432];
+   u_char _unknown3[0x400];
    union {
-      uint32_t blocks[VMFS_INODE_BLK_COUNT];
+      struct sblkloc blocks[VMFS_INODE_BLK_COUNT];
+//weafonvmfs6      uint32_t blocks[VMFS_INODE_BLK_COUNT];      
       uint32_t rdm_id;
       char content[VMFS_INODE_BLK_COUNT * sizeof(uint32_t)];
    };
