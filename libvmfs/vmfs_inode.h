@@ -36,7 +36,7 @@ struct sblkloc
 	uint32_t unknown0:24;
 	uint16_t unknown1;
 	uint16_t unknown2:3;
-	uint16_t blocks:15;	
+	uint16_t blocks:13;	
 } __attribute__((packed));
 struct vmfs_inode_raw {
    struct vmfs_metadata_hdr_raw mdh;

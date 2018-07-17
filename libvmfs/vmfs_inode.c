@@ -39,7 +39,7 @@ static inline uint32_t vmfs_inode_read_blk_id(const u_char *buf,u_int index)
 #if WF_VMFS6 == 1
 	struct sblkloc* p = (struct sblkloc*)(buf+VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(struct sblkloc)));
 	struct sblkloc32 r;
-	printf("type 0x%x flag 0x%x blk 0x%x\n", p->type, p->flag, p->blocks);
+	printf("HEx 0x%016lx type 0x%x flag 0x%x blk 0x%x\n", *(uint64_t*)p, p->type, p->flag, p->blocks);
 	r.type = p->type;
 	r.flag = p->flag;
 	r.blocks = p->blocks;
