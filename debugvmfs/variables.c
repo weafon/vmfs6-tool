@@ -803,6 +803,7 @@ static void *get_dirent(void *value, const char *index)
    bname = m_basename(index);
    dname = m_dirname(index);
 
+
    if (!(dir = vmfs_dir_open_at(current_dir,dname)))
       return NULL;
    if (!vmfs_dir_lookup(dir,bname))

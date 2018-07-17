@@ -120,7 +120,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       fprintf(stderr,"VMFS: unable to open root directory\n");
       return(-1);
    }
-
+	printf("Open root dir done\n");
    if (!(fs->fbb = vmfs_bitmap_open_at(root_dir,VMFS_FBB_FILENAME))) {
       fprintf(stderr,"Unable to open file-block bitmap (FBB).\n");
       return(-1);

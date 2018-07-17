@@ -181,7 +181,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
       blk_type = VMFS_BLK_FB_TBZ(blk_id) ?
                     VMFS_BLK_TYPE_NONE : VMFS_BLK_TYPE(blk_id);
-	  printf("%s : call for pos %d , got blk_id %u type %u\n", __FUNCTION__, pos, blk_id, blk_type);
+	  printf("%s : call for pos %ld , got blk_id %u (0x%x) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
 
       switch(blk_type) {
          /* Unallocated block */
@@ -219,7 +219,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
             fprintf(stderr,"VMFS: unknown block type 0x%2.2x\n",blk_type);
             return(-EIO);
       }
-
+		printf("%s : call end with res %d\n", __FUNCTION__, res);
       /* Error while reading block, abort immediately */
       if (res < 0)
          return(res);
@@ -369,7 +369,7 @@ int vmfs_file_lstat_at(vmfs_dir_t *dir,const char *path,struct stat *buf)
    const vmfs_dirent_t *entry;
    vmfs_dir_t *d;
    char *name;
-
+	printf("%s called for path %s\n", __FUNCTION__, path);
    name = m_dirname(path);
    d = vmfs_dir_open_at(dir,name);
    free(name);

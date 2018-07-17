@@ -35,8 +35,8 @@ static ssize_t vmfs_vol_read(const vmfs_device_t *dev,off_t pos,
                              u_char *buf,size_t len)
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
-   pos += vol->vmfs_base + 0x1000000; //weafonvmfs6 0x1000000;
-
+   pos += vol->vmfs_base + 0x1000000; 
+	printf("abs read loc 0x%lx len %d\n", pos, len);
    return(m_pread(vol->fd,buf,len,pos));
 }
 
@@ -45,7 +45,7 @@ static ssize_t vmfs_vol_write(const vmfs_device_t *dev,off_t pos,
                               const u_char *buf,size_t len)
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
-   pos += vol->vmfs_base + 0x1000000; //weafonvmfs6 0x1000000;
+   pos += vol->vmfs_base + 0x1000000; 
 
    return(m_pwrite(vol->fd,buf,len,pos));
 }
@@ -92,8 +92,12 @@ static int vmfs_vol_check_reservation(vmfs_volume_t *vol)
 /* Read volume information */
 static int vmfs_volinfo_read(vmfs_volume_t *volume)
 {
-//weafonvmfs6   DECL_ALIGNED_BUFFER(buf,1024); 
+#if WF_VMFS6 == 1
    DECL_ALIGNED_BUFFER(buf,8192); 
+#else
+   DECL_ALIGNED_BUFFER(buf,1024); 
+#endif   
+
 
    vmfs_volinfo_t *vol = &volume->vol_info;
 

@@ -24,7 +24,6 @@
 #include <string.h>
 #include <errno.h>
 #include "vmfs.h"
-
 /* Read a directory entry */
 static int vmfs_dirent_read(vmfs_dirent_t *entry,const u_char *buf)
 {
@@ -188,10 +187,10 @@ static int vmfs_dir_cache_entries(vmfs_dir_t *d)
       free(d->buf);
 
    dir_size = vmfs_file_get_size(d->dir);
+   printf("%s : dir size %ld\n", __FUNCTION__, dir_size);
 
    if (!(d->buf = calloc(1,dir_size)))
       return(-1);
-
    if (vmfs_file_pread(d->dir,d->buf,dir_size,0) != dir_size) {
       free(d->buf);
       return(-1);
@@ -206,7 +205,10 @@ static vmfs_dir_t *vmfs_dir_open_from_file(vmfs_file_t *file)
    vmfs_dir_t *d;
 
    if (file == NULL)
+   {
+   		printf("Fail to get meaningful file pointer\n");
       return NULL;
+     }
 
    if (!(d = calloc(1, sizeof(*d))) ||
        (file->inode->type != VMFS_FILE_TYPE_DIR)) {
@@ -216,43 +218,60 @@ static vmfs_dir_t *vmfs_dir_open_from_file(vmfs_file_t *file)
 
    d->dir = file;
    vmfs_dir_cache_entries(d);
+   printf("%s : end\n", __FUNCTION__);
    return d;
 }
 
 /* Open a directory based on an inode buffer */
 vmfs_dir_t *vmfs_dir_open_from_inode(const vmfs_inode_t *inode)
 {
-   return vmfs_dir_open_from_file(vmfs_file_open_from_inode(inode));
+	vmfs_dir_t* pret = vmfs_dir_open_from_file(vmfs_file_open_from_inode(inode));
+	printf("%s : end\n", __FUNCTION__);
+	return pret;
 }
 
 /* Open a directory based on a directory entry */
 vmfs_dir_t *vmfs_dir_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id)
 {
-   return vmfs_dir_open_from_file(vmfs_file_open_from_blkid(fs,blk_id));
+   vmfs_dir_t* pret =  vmfs_dir_open_from_file(vmfs_file_open_from_blkid(fs,blk_id));
+   printf("%s : end\n", __FUNCTION__);
+   return pret;
+   
 }
 
 /* Open a directory */
 vmfs_dir_t *vmfs_dir_open_at(vmfs_dir_t *d,const char *path)
 {
-   return vmfs_dir_open_from_file(vmfs_file_open_at(d,path));
+   vmfs_dir_t* pret = vmfs_dir_open_from_file(vmfs_file_open_at(d,path));
+   printf("%s : end\n", __FUNCTION__);
+   return pret;
+   
 }
+
 
 /* Return next entry in directory. Returned directory entry will be overwritten
 by subsequent calls */
 const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 {
    u_char *buf;
+	uint32_t off=0;   
    if (d == NULL)
       return(NULL);
-
+#if WF_VMFS6 == 1      
+	   if (d->pos<2)
+		   off=0x3b8;
+	   else
+		   off=0x11040 - 2*VMFS_DIRENT_SIZE;
+#endif
+	
    if (d->buf) {
-      if (d->pos*VMFS_DIRENT_SIZE >= vmfs_file_get_size(d->dir))
+      if (d->pos*VMFS_DIRENT_SIZE>= vmfs_file_get_size(d->dir))
          return(NULL);
-      buf = &d->buf[d->pos*VMFS_DIRENT_SIZE];
+      buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
    } else {
       u_char _buf[VMFS_DIRENT_SIZE];
       if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
-                           d->pos*sizeof(_buf)) != sizeof(_buf)))
+                           off+d->pos*sizeof(_buf)) != sizeof(_buf)))
          return(NULL);
       buf = _buf;
    }
