@@ -162,7 +162,10 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
    /* We don't handle RDM files */
    if (f->inode->type == VMFS_FILE_TYPE_RDM)
+   {
+   		printf("not handle RDM files\n");
       return(-EIO);
+     }
 
    blk_size = vmfs_fs_get_blocksize(fs);
    file_size = vmfs_file_get_size(f);
@@ -172,7 +175,10 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
          break;
 
       if ((err = vmfs_inode_get_block(f->inode,pos,&blk_id)) < 0)
+      {
+      	printf("fail to get block 0x%lx\n", blk_id);
          return(err);
+        }
 
 #if 0
       if (f->vol->debug_level > 1)
@@ -195,6 +201,9 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
          /* File-Block */
          case VMFS_BLK_TYPE_FB:
+#if WF_VMFS6 == 1
+		case VMFS_BLK_TYPE_XX:
+#endif
             exp_len = m_min(len,file_size - pos);
             res = vmfs_block_read_fb(fs,blk_id,pos,buf,exp_len);
             break;

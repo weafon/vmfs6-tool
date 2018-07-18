@@ -25,6 +25,9 @@ enum vmfs_block_type {
    VMFS_BLK_TYPE_SB,     /* Sub-Block */
    VMFS_BLK_TYPE_PB,     /* Pointer Block */
    VMFS_BLK_TYPE_FD,     /* File Descriptor */
+#if WF_VMFS6==1   
+   VMFS_BLK_TYPE_XX,
+#endif   
    VMFS_BLK_TYPE_MAX,
 };
 

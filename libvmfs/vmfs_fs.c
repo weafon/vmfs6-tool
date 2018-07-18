@@ -101,6 +101,15 @@ static vmfs_bitmap_t *vmfs_open_meta_file(vmfs_dir_t *root_dir, char *name,
       fprintf(stderr, "Unsupported number of items per entry in %s.\n", desc);
       return NULL;
    }
+#if WF_VMFS6==1   
+   if (bitmap->bmh.total_items==0)
+   {
+   		bitmap->bmh.items_per_bitmap_entry = 0x100;
+   		bitmap->bmh.total_items = bitmap->bmh.items_per_bitmap_entry* bitmap->bmh.bmp_entries_per_area*bitmap->bmh.area_count;
+   		printf("Force to set items to 0x100\n");
+   		   	return bitmap;
+   	}
+#endif
    if ((bitmap->bmh.total_items + bitmap->bmh.items_per_bitmap_entry - 1) /
         bitmap->bmh.items_per_bitmap_entry > max_entry) {
       fprintf(stderr,"Unsupported number of entries in %s.\n", desc);
@@ -141,10 +150,10 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
                                  "pointer block bitmap (PBC)");
    if (!fs->pbc)
       return(-1);
-
+	printf("%s : open sbc\n", __FUNCTION__);
    fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
                                  VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
-                                 "pointer block bitmap (PBC)");
+                                 "pointer super bitmap (SBC)");
    if (!fs->sbc)
       return(-1);
 

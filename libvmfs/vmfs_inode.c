@@ -331,6 +331,10 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint32_t *blk_id)
    switch(zla) {
       case VMFS_BLK_TYPE_FB:
       case VMFS_BLK_TYPE_SB:
+#if WF_VMFS6==1   
+	  case VMFS_BLK_TYPE_XX:
+#endif   
+      
          blk_index = pos / inode->blk_size;
          
          if (blk_index >= VMFS_INODE_BLK_COUNT)
@@ -378,6 +382,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint32_t *blk_id)
          }
       default:
          /* Unexpected ZLA type */
+        	printf("Unexpected ZLA\n");
          return(-EIO);
    }
 
