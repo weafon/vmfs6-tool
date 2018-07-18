@@ -265,7 +265,7 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 #endif
 	
    if (d->buf) {
-      if (d->pos*VMFS_DIRENT_SIZE>= vmfs_file_get_size(d->dir))
+      if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
          return(NULL);
       buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
    } else {
