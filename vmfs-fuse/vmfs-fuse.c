@@ -229,6 +229,7 @@ static void vmfs_fuse_opendir(fuse_req_t req, fuse_ino_t ino,
       fuse_reply_err(req, ENOTDIR);
 }
 
+#include <stdio.h>
 static void vmfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                               off_t off, struct fuse_file_info *fi)
 {
@@ -236,18 +237,26 @@ static void vmfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
    const vmfs_dirent_t *entry;
    struct stat st = {0, };
    size_t sz;
+   FILE* fp;
 
    if (!fi->fh) {
       fuse_reply_err(req, EBADF);
       return;
    }
+   fp = fopen("/tmp/fuse.log","a+");
+
+
    if ((entry = vmfs_dir_read((vmfs_dir_t *)(unsigned long)fi->fh))) {
       st.st_mode = vmfs_file_type2mode(entry->type);
       st.st_ino = blkid2ino(entry->block_id);
+      fprintf(fp, "fuse readdir ino %d block id %d name %s\n", st.st_ino, entry->block_id, entry->name);      
       sz = fuse_add_direntry(req, buf, size, entry->name, &st, off + 1);
       fuse_reply_buf(req, buf, sz);
-   } else
+   } else {
+      fprintf(fp, "fail to fuse dir read\n");
       fuse_reply_buf(req, NULL, 0);
+   }
+   fclose(fp);      
 }
 
 static void vmfs_fuse_releasedir(fuse_req_t req, fuse_ino_t ino,

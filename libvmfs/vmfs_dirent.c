@@ -258,10 +258,10 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
    if (d == NULL)
       return(NULL);
 #if WF_VMFS6 == 1      
-	   if (d->pos<2)
-		   off=0x3b8;
-	   else
-		   off=0x11040 - 2*VMFS_DIRENT_SIZE;
+   if (d->pos<2)
+	   off=0x3b8;
+   else
+	   off=0x11040 - 2*VMFS_DIRENT_SIZE;
 #endif
 	
    if (d->buf) {
@@ -277,6 +277,8 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
    }
 
    vmfs_dirent_read(&d->dirent,buf);
+   if (d->dirent.block_id == 0)
+   	return (NULL);
    d->pos++;
 
    return &d->dirent;
