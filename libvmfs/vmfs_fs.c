@@ -91,7 +91,10 @@ static vmfs_bitmap_t *vmfs_open_meta_file(vmfs_dir_t *root_dir, char *name,
                                           uint32_t max_item, uint32_t max_entry,
                                           char *desc)
 {
-   vmfs_bitmap_t *bitmap = vmfs_bitmap_open_at(root_dir, name);
+   vmfs_bitmap_t *bitmap;
+
+   printf("%s : call for metafile %s\n", __FUNCTION__, name);
+   bitmap = vmfs_bitmap_open_at(root_dir, name);
    if (!bitmap) {
       fprintf(stderr, "Unable to open %s.\n", desc);
       return NULL;

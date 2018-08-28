@@ -70,7 +70,7 @@ vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 vmfs_file_t *vmfs_file_open_at(vmfs_dir_t *dir,const char *path)
 {
    uint64_t blk_id;
-
+	printf("%s : search and open %s for read\n", __FUNCTION__, path);
    if (!(blk_id = vmfs_dir_resolve_path(dir,path,1)))
       return(NULL);
 

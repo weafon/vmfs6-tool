@@ -82,9 +82,10 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
       for(i=0;i<VMFS_INODE_BLK_COUNT;i++)
       {
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
-	      printf("%d:0x%x\n", i, inode->blocks[i]);      	         
          if (inode->blocks[i] == 0)	      
          	break;
+		 printf("%d:%016lx\n", i, inode->blocks[i]);				
+         	
        }
        printf("-------\n");
    }

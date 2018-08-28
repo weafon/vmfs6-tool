@@ -517,7 +517,7 @@ static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
 
    if (!f)
       return NULL;
-	printf("%s : called\n", __FUNCTION__);
+	printf("%s : called to file_pread\n", __FUNCTION__);
    if (vmfs_file_pread(f,buf,buf_len,0) != buf_len) {
    	printf("%s : fail pread\n", __FUNCTION__);
       vmfs_file_close(f);
