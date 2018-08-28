@@ -27,6 +27,7 @@
 #include "vmfs.h"
 
 
+
 static inline uint64_t vmfs_inode_read_blk_id(const u_char *buf,u_int index)
 {
    return(read_le64(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(uint64_t))));
@@ -77,8 +78,8 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
    } else if (inode->zla == VMFS5_ZLA_BASE + VMFS_BLK_TYPE_FD) {
       memcpy(inode->content, buf + VMFS_INODE_OFS_CONTENT, inode->size);
    } else {
-      printf("file id %d off %ld blk:\n", inode->id, 
-      	VMFS_INODE_OFS_BLK_ARRAY);
+      printf("file id %d off %ld blk:\n", inode->id, VMFS_INODE_OFS_BLK_ARRAY);
+      hexdump(buf+VMFS_INODE_OFS_BLK_ARRAY,256);
       for(i=0;i<VMFS_INODE_BLK_COUNT;i++)
       {
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);

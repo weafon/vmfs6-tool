@@ -239,3 +239,40 @@ char *m_basename(const char *path)
    free(basec);
    return(bname);
 }
+
+
+void hexdump(const unsigned char* data, int len)
+{
+	int i,j,k;
+	int fg=0;
+	printf("-------------------------\n");
+	printf("HEX DUMP OF mem %p len %d\n", data, len);
+	printf("-------------------------\n");
+	for(i=0;i<(len/16);i++)
+	{
+		for(k=0;k<16;k++)
+			if (data[i*16+k]!=0)
+				break;
+		if (k<16)
+		{
+			fg=0;
+			printf("%8p : ",data+i*16);
+			for(j=0;j<16;j++)
+				printf("%02x ", (unsigned char)data[i*16+j]);
+			for(j=0;j<16;j++)
+			{
+				if (data[i*16+j]>32)
+					printf("%c", data[i*16+j]);			
+				else
+					printf(".");
+			}
+			printf("\n");
+		} else if ((k==16)&&(fg==0))
+		{
+			printf("zz\n");
+			fg=1;
+		}
+	}
+}
+
+

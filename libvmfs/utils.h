@@ -178,6 +178,9 @@ char *m_dirname(const char *path);
 /* Returns base name */
 char *m_basename(const char *path);
 
+void hexdump(const unsigned char* data, int len);
+
+
 #ifdef NO_STRNDUP
 #include <stdlib.h>
 

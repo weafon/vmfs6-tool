@@ -159,7 +159,17 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
                                  "pointer super bitmap (SBC)");
    if (!fs->sbc)
       return(-1);
-
+	if (fs->sbc->bmh.hdr_size==0)
+	{
+		printf("Force to fill sbc bmh\n");
+		fs->sbc->bmh.items_per_bitmap_entry = 0x100;
+		fs->sbc->bmh.bmp_entries_per_area = 8;
+		fs->sbc->bmh.hdr_size = 0x10000;
+		fs->sbc->bmh.data_size = 0x10000;
+		fs->sbc->bmh.area_size = 0x8010000;
+		fs->sbc->bmh.total_items = 0x4000;
+		fs->sbc->bmh.area_count = 8;
+	}
    vmfs_bitmap_close(fdc);
    vmfs_dir_close(root_dir);
    return(0);

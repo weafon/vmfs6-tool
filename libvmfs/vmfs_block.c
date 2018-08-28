@@ -170,7 +170,7 @@ int vmfs_block_alloc(const vmfs_fs_t *fs,uint32_t blk_type,uint64_t *blk_id)
          *blk_id = VMFS_BLK_FB_BUILD(addr, 0);
          break;
       case VMFS_BLK_TYPE_SB:
-         *blk_id = VMFS_BLK_SB_BUILD(entry.id, item, 0);
+         *blk_id = VMFS_BLK_SB_BUILD((uint64_t)entry.id, (uint64_t)item, 0);
          break;
       case VMFS_BLK_TYPE_PB:
          *blk_id = VMFS_BLK_PB_BUILD(entry.id, item, 0);
@@ -253,13 +253,14 @@ ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    DECL_ALIGNED_BUFFER_WOL(tmpbuf,fs->sbc->bmh.data_size);
    uint32_t offset,sbc_entry,sbc_item;
    size_t clen;
+   printf("%s : blk_id 0x%016lx fs->sbc->bmh.data_size %u\n", __FUNCTION__, blk_id, fs->sbc->bmh.data_size);
 
    offset = pos % fs->sbc->bmh.data_size;
    clen   = m_min(fs->sbc->bmh.data_size - offset,len);
-
+	printf("%s : blk_id 0x%016lx offset %u clen %u\n", __FUNCTION__,  blk_id, offset, clen);
    sbc_entry = VMFS_BLK_SB_ENTRY(blk_id);
    sbc_item  = VMFS_BLK_SB_ITEM(blk_id);
-
+	printf("%s : entry %lu %u item %lu %u\n", __FUNCTION__, VMFS_BLK_SB_ENTRY(blk_id), sbc_entry, VMFS_BLK_SB_ITEM(blk_id), sbc_item);
    if (!vmfs_bitmap_get_item(fs->sbc,sbc_entry,sbc_item,tmpbuf))
       return(-EIO);
 

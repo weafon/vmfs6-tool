@@ -207,6 +207,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 #endif
             exp_len = m_min(len,file_size - pos);
             res = vmfs_block_read_fb(fs,blk_id,pos,buf,exp_len);
+//            hexdump(buf, exp_len);
             break;
 
          /* Sub-Block */

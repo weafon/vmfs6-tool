@@ -509,6 +509,7 @@ int vmfs_bitmap_check(vmfs_bitmap_t *b)
    return(errors);
 }
 
+
 /* Open a bitmap file */
 static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
 {
@@ -528,7 +529,7 @@ static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
       vmfs_file_close(f);
       return NULL;
    }
-
+   hexdump(buf, buf_len);
    vmfs_bmh_read(&b->bmh, buf);
    b->f = f;
 	printf("%s : leave\n", __FUNCTION__);   
