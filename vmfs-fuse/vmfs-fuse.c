@@ -32,7 +32,7 @@ static inline uint32_t ino2blkid(fuse_ino_t ino)
    return((uint32_t)ino);
 }
 
-static inline fuse_ino_t blkid2ino(uint32_t blk_id)
+static inline fuse_ino_t blkid2ino(uint64_t blk_id)
 {
    if (blk_id == VMFS_BLK_FD_BUILD(0, 0, 0))
       return(FUSE_ROOT_ID);

@@ -84,7 +84,7 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
 vmfs_dir_t *vmfs_dir_open_from_inode(const vmfs_inode_t *inode);
 
 /* Open a directory based on a directory entry */
-vmfs_dir_t *vmfs_dir_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id);
+vmfs_dir_t *vmfs_dir_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id);
 
 /* Open a directory */
 vmfs_dir_t *vmfs_dir_open_at(vmfs_dir_t *d,const char *path);

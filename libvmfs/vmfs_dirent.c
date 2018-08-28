@@ -231,7 +231,7 @@ vmfs_dir_t *vmfs_dir_open_from_inode(const vmfs_inode_t *inode)
 }
 
 /* Open a directory based on a directory entry */
-vmfs_dir_t *vmfs_dir_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id)
+vmfs_dir_t *vmfs_dir_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    vmfs_dir_t* pret =  vmfs_dir_open_from_file(vmfs_file_open_from_blkid(fs,blk_id));
    printf("%s : end\n", __FUNCTION__);

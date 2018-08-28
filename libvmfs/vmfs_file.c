@@ -56,10 +56,10 @@ vmfs_file_t *vmfs_file_open_from_inode(const vmfs_inode_t *inode)
 }
 
 /* Open a file based on a directory entry */
-vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id)
+vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    vmfs_inode_t *inode;
-	printf("%s: blk_id 0x%x\n", __FUNCTION__, blk_id);
+	printf("%s: blk_id 0x%lx\n", __FUNCTION__, blk_id);
    if (!(inode = vmfs_inode_acquire(fs,blk_id)))
       return NULL;
 
@@ -69,7 +69,7 @@ vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id)
 /* Open a file */
 vmfs_file_t *vmfs_file_open_at(vmfs_dir_t *dir,const char *path)
 {
-   uint32_t blk_id;
+   uint64_t blk_id;
 
    if (!(blk_id = vmfs_dir_resolve_path(dir,path,1)))
       return(NULL);
@@ -150,7 +150,8 @@ int vmfs_file_close(vmfs_file_t *f)
 ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 {
    const vmfs_fs_t *fs = vmfs_file_get_fs(f);
-   uint32_t blk_id,blk_type;
+   uint64_t blk_id;
+   uint32_t blk_type;
    uint64_t blk_size,blk_len;
    uint64_t file_size,offset;
    ssize_t res=0,rlen = 0;
@@ -187,7 +188,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
       blk_type = VMFS_BLK_FB_TBZ(blk_id) ?
                     VMFS_BLK_TYPE_NONE : VMFS_BLK_TYPE(blk_id);
-	  printf("%s : call for pos %ld , got blk_id %u (0x%x) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
+	  printf("%s : call for pos %ld , got blk_id %lu (0x%lx) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
 
       switch(blk_type) {
          /* Unallocated block */
@@ -228,7 +229,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
             fprintf(stderr,"VMFS: unknown block type 0x%2.2x\n",blk_type);
             return(-EIO);
       }
-		printf("%s : call end with res %d\n", __FUNCTION__, res);
+		printf("%s : call end with res %ld\n", __FUNCTION__, res);
       /* Error while reading block, abort immediately */
       if (res < 0)
          return(res);
@@ -249,7 +250,8 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 ssize_t vmfs_file_pwrite(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 {   
    const vmfs_fs_t *fs = vmfs_file_get_fs(f);
-   uint32_t blk_id,blk_type;
+   uint64_t blk_id;
+   uint32_t blk_type;
    ssize_t res=0,wlen = 0;
    int err;
 
@@ -364,7 +366,7 @@ int vmfs_file_fstat(const vmfs_file_t *f,struct stat *buf)
 /* Get file file status (follow symlink) */
 int vmfs_file_stat_at(vmfs_dir_t *dir,const char *path,struct stat *buf)
 {
-   uint32_t blk_id;
+   uint64_t blk_id;
 
    if (!(blk_id = vmfs_dir_resolve_path(dir,path,1)))
       return(-ENOENT);

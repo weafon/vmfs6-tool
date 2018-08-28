@@ -282,7 +282,7 @@ static int cmd_df(vmfs_dir_t *base_dir,int argc,char *argv[])
 static int cmd_get_file_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 {
    vmfs_file_t *f;
-   uint32_t blk_id;
+   uint64_t blk_id;
    off_t pos;
    int ret = 0;
 
@@ -342,7 +342,8 @@ static int cmd_show_heartbeats(vmfs_dir_t *base_dir,int argc,char *argv[])
 static int cmd_read_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 {    
    const vmfs_fs_t *fs = vmfs_dir_get_fs(base_dir);
-   uint32_t blk_id,blk_type;
+   uint64_t blk_id;
+   uint32_t blk_type;
    uint64_t blk_size;
    u_char *buf;
    size_t len;
@@ -359,7 +360,7 @@ static int cmd_read_block(vmfs_dir_t *base_dir,int argc,char *argv[])
       return(-1);
 
    for(i=0;i<argc;i++) {
-      blk_id = (uint32_t)strtoul(argv[0],NULL,16);
+      blk_id = (uint64_t)strtoul(argv[0],NULL,16);
       blk_type = VMFS_BLK_TYPE(blk_id);
       len = 0;
 
@@ -409,7 +410,7 @@ static int cmd_read_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 static int cmd_alloc_block_fixed(vmfs_dir_t *base_dir,int argc,char *argv[])
 {
    const vmfs_fs_t *fs = vmfs_dir_get_fs(base_dir);
-   uint32_t blk_id;
+   uint64_t blk_id;
    int res;
 
    if (argc == 0) {
@@ -417,14 +418,14 @@ static int cmd_alloc_block_fixed(vmfs_dir_t *base_dir,int argc,char *argv[])
       return(-1);
    }
 
-   blk_id = (uint32_t)strtoul(argv[0],NULL,16);
+   blk_id = (uint64_t)strtoul(argv[0],NULL,16);
 
    res = vmfs_block_alloc_specified(fs,blk_id);
 
    if (res == 0) {
-      printf("Block 0x%8.8x allocated.\n",blk_id);
+      printf("Block 0x%8.8lx allocated.\n",blk_id);
    } else {
-      fprintf(stderr,"Unable to allocate block 0x%8.8x\n",blk_id);
+      fprintf(stderr,"Unable to allocate block 0x%8.8lx\n",blk_id);
    }
 
    return(0);
@@ -434,7 +435,8 @@ static int cmd_alloc_block_fixed(vmfs_dir_t *base_dir,int argc,char *argv[])
 static int cmd_alloc_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 {
    const vmfs_fs_t *fs = vmfs_dir_get_fs(base_dir);
-   uint32_t blk_type,blk_id;
+   uint32_t blk_type;
+   uint64_t blk_id;
    int res;
 
    if (argc == 0) {
@@ -447,7 +449,7 @@ static int cmd_alloc_block(vmfs_dir_t *base_dir,int argc,char *argv[])
    res = vmfs_block_alloc(fs,blk_type,&blk_id);
 
    if (res == 0) {
-      printf("Block 0x%8.8x allocated.\n",blk_id);
+      printf("Block 0x%8.8lx allocated.\n",blk_id);
    } else {
       fprintf(stderr,"Unable to allocate block.\n");
    }
@@ -459,7 +461,7 @@ static int cmd_alloc_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 static int cmd_free_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 {
    const vmfs_fs_t *fs = vmfs_dir_get_fs(base_dir);
-   uint32_t blk_id;
+   uint64_t blk_id;
    int res;
 
    if (argc == 0) {
@@ -467,14 +469,14 @@ static int cmd_free_block(vmfs_dir_t *base_dir,int argc,char *argv[])
       return(-1);
    }
 
-   blk_id = (uint32_t)strtoul(argv[0],NULL,16);
+   blk_id = (uint64_t)strtoul(argv[0],NULL,16);
 
    res = vmfs_block_free(fs,blk_id);
 
    if (res == 0) {
-      printf("Block 0x%8.8x freed.\n",blk_id);
+      printf("Block 0x%8.8lx freed.\n",blk_id);
    } else {
-      fprintf(stderr,"Unable to free block 0x%8.8x\n",blk_id);
+      fprintf(stderr,"Unable to free block 0x%8.8lx\n",blk_id);
    }
 
    return(0);

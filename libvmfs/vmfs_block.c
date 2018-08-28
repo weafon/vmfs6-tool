@@ -29,7 +29,7 @@
 #include "vmfs.h"
 
 /* Get bitmap info (bitmap type,entry and item) from a block ID */
-int vmfs_block_get_info(uint32_t blk_id, vmfs_block_info_t *info)
+int vmfs_block_get_info(uint64_t blk_id, vmfs_block_info_t *info)
 {
    uint32_t blk_type;
 
@@ -76,7 +76,7 @@ int vmfs_block_get_info(uint32_t blk_id, vmfs_block_info_t *info)
 }
 
 /* Get block status (allocated or free) */
-int vmfs_block_get_status(const vmfs_fs_t *fs,uint32_t blk_id)
+int vmfs_block_get_status(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    vmfs_bitmap_entry_t entry;
    vmfs_bitmap_t *bmp;
@@ -95,7 +95,7 @@ int vmfs_block_get_status(const vmfs_fs_t *fs,uint32_t blk_id)
 }
 
 /* Allocate or free the specified block */
-static int vmfs_block_set_status(const vmfs_fs_t *fs,uint32_t blk_id,
+static int vmfs_block_set_status(const vmfs_fs_t *fs,uint64_t blk_id,
                                  int status)
 {
    DECL_ALIGNED_BUFFER(buf,VMFS_BITMAP_ENTRY_SIZE);
@@ -132,19 +132,19 @@ static int vmfs_block_set_status(const vmfs_fs_t *fs,uint32_t blk_id,
 }
 
 /* Allocate the specified block */
-int vmfs_block_alloc_specified(const vmfs_fs_t *fs,uint32_t blk_id)
+int vmfs_block_alloc_specified(const vmfs_fs_t *fs,uint64_t blk_id)
 { 
    return(vmfs_block_set_status(fs,blk_id,1));
 }
 
 /* Free the specified block */
-int vmfs_block_free(const vmfs_fs_t *fs,uint32_t blk_id)
+int vmfs_block_free(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    return(vmfs_block_set_status(fs,blk_id,0));
 }
 
 /* Allocate a single block */
-int vmfs_block_alloc(const vmfs_fs_t *fs,uint32_t blk_type,uint32_t *blk_id)
+int vmfs_block_alloc(const vmfs_fs_t *fs,uint32_t blk_type,uint64_t *blk_id)
 {
    vmfs_bitmap_t *bmp;
    vmfs_bitmap_entry_t entry;
@@ -184,7 +184,7 @@ int vmfs_block_alloc(const vmfs_fs_t *fs,uint32_t blk_type,uint32_t *blk_id)
 }
 
 /* Zeroize a file block */
-int vmfs_block_zeroize_fb(const vmfs_fs_t *fs,uint32_t blk_id)
+int vmfs_block_zeroize_fb(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    DECL_ALIGNED_BUFFER(buf,M_DIO_BLK_SIZE);
    uint32_t blk_item;
@@ -214,7 +214,7 @@ int vmfs_block_free_pb(const vmfs_fs_t *fs,uint32_t pb_blk,
 {     
    DECL_ALIGNED_BUFFER(buf,fs->pbc->bmh.data_size);
    uint32_t pbc_entry,pbc_item;
-   uint32_t blk_id;
+   uint64_t blk_id;
    int i,count = 0;
 
    if (VMFS_BLK_TYPE(pb_blk) != VMFS_BLK_TYPE_PB)
@@ -227,7 +227,7 @@ int vmfs_block_free_pb(const vmfs_fs_t *fs,uint32_t pb_blk,
       return(-EIO);
 
    for(i=start;i<end;i++) {
-      blk_id = read_le32(buf,i*sizeof(uint32_t));
+      blk_id = read_le64(buf,i*sizeof(uint32_t));
 
       if (blk_id != 0) {
          vmfs_block_free(fs,blk_id);
@@ -247,7 +247,7 @@ int vmfs_block_free_pb(const vmfs_fs_t *fs,uint32_t pb_blk,
 }
 
 /* Read a piece of a sub-block */
-ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
+ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
                            u_char *buf,size_t len)
 {
    DECL_ALIGNED_BUFFER_WOL(tmpbuf,fs->sbc->bmh.data_size);
@@ -268,7 +268,7 @@ ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
 }
 
 /* Write a piece of a sub-block */
-ssize_t vmfs_block_write_sb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
+ssize_t vmfs_block_write_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
                             u_char *buf,size_t len)
 {
    DECL_ALIGNED_BUFFER_WOL(tmpbuf,fs->sbc->bmh.data_size);
@@ -302,7 +302,7 @@ ssize_t vmfs_block_write_sb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
 }
 
 /* Read a piece of a file block */
-ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
+ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
                            u_char *buf,size_t len)
 {
    uint64_t offset,n_offset,blk_size;
@@ -320,6 +320,12 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
    n_clen   = ALIGN_NUM(clen + (offset - n_offset),M_DIO_BLK_SIZE);
 
    fb_item = VMFS_BLK_FB_ITEM(blk_id);
+
+	printf("blk id %lx %lx %lx %lx\n", 
+		VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), 
+		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
+		VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), 
+		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), VMFS_BLK_FB_ITEM_VALUE_MSB_MASK));
 
    /* If everything is aligned for direct I/O, store directly in user buffer */
    if ((n_offset == offset) && (n_clen == clen) &&
@@ -348,7 +354,7 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
 }
 
 /* Write a piece of a file block */
-ssize_t vmfs_block_write_fb(const vmfs_fs_t *fs,uint32_t blk_id,off_t pos,
+ssize_t vmfs_block_write_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
                             u_char *buf,size_t len)
 {
    uint64_t offset,n_offset,blk_size;

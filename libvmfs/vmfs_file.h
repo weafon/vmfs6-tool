@@ -75,7 +75,7 @@ vmfs_file_t *vmfs_file_open_from_host(const char *path);
 vmfs_file_t *vmfs_file_open_from_inode(const vmfs_inode_t *inode);
 
 /* Open a file based on a block id */
-vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id);
+vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id);
 
 /* Open a file */
 vmfs_file_t *vmfs_file_open_at(vmfs_dir_t *dir,const char *path);

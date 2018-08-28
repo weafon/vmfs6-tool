@@ -166,7 +166,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
 static int vmfs_read_fdc_base(vmfs_fs_t *fs)
 {
    vmfs_inode_t inode = { { 0, }, };
-   uint32_t fdc_base;
+   uint64_t fdc_base;
 
    /* 
     * Compute position of FDC base: it is located at the first
@@ -180,7 +180,7 @@ static int vmfs_read_fdc_base(vmfs_fs_t *fs)
                     vmfs_fs_get_blocksize(fs));
 
    if (fs->debug_level > 0)
-      printf("FDC base = block #%u\n", fdc_base);
+      printf("FDC base = block #%lu\n", fdc_base);
 
    inode.fs = fs;
    inode.mdh.magic = VMFS_INODE_MAGIC;
@@ -191,6 +191,10 @@ static int vmfs_read_fdc_base(vmfs_fs_t *fs)
    inode.zla = VMFS_BLK_TYPE_FB;
    inode.blocks[0] = VMFS_BLK_FB_BUILD(fdc_base, 0);
    inode.ref_count = 1;
+   printf("fdc_base %lu blocks0 %lx (%lx %lx shift %d)\n", fdc_base, inode.blocks[0], 
+   	VMFS_BLK_VALUE(fdc_base, VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
+   	VMFS_BLK_FILL(VMFS_BLK_VALUE(fdc_base, VMFS_BLK_FB_ITEM_VALUE_LSB_MASK), VMFS_BLK_FB_ITEM_LSB_MASK),
+   	VMFS_BLK_SHIFT(VMFS_BLK_FB_ITEM_LSB_MASK));
 
    fs->fdc = vmfs_bitmap_open_from_inode(&inode);
 

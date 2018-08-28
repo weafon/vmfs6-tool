@@ -36,7 +36,7 @@ typedef struct vmfs_blk_map vmfs_blk_map_t;
 /* Directory mapping */
 struct vmfs_dir_map {
    char *name;
-   uint32_t blk_id;
+   uint64_t blk_id;
    int is_dir;
    
    vmfs_blk_map_t *blk_map;
@@ -54,7 +54,7 @@ struct vmfs_dir_map {
 #define VMFS_BLK_MAP_MAX_INODES  32
 
 struct vmfs_blk_map {
-   uint32_t blk_id;
+   uint64_t blk_id;
    union {
       uint32_t inode_id[VMFS_BLK_MAP_MAX_INODES];
       vmfs_inode_t inode;
@@ -90,7 +90,7 @@ struct vmfs_fsck_info {
 };
 
 /* Allocate a directory map structure */
-vmfs_dir_map_t *vmfs_dir_map_alloc(const char *name,uint32_t blk_id)
+vmfs_dir_map_t *vmfs_dir_map_alloc(const char *name,uint64_t blk_id)
 {
    vmfs_dir_map_t *map;
 
@@ -145,7 +145,7 @@ void vmfs_dir_map_show_entry(vmfs_dir_map_t *map,int level)
    for(i=0;i<level;i++)
       printf("   ");
 
-   printf("%s (0x%8.8x)\n",map->name,map->blk_id);
+   printf("%s (0x%8.8lx)\n",map->name,map->blk_id);
 
    for(child=map->child_list;child;child=child->next)
       vmfs_dir_map_show_entry(child,level+1);
@@ -191,13 +191,13 @@ char *vmfs_dir_map_get_path(vmfs_dir_map_t *map,char *buffer,size_t len)
 }
 
 /* Hash function for a block ID */
-static inline u_int vmfs_block_map_hash(uint32_t blk_id)
+static inline u_int vmfs_block_map_hash(uint64_t blk_id)
 {
    return(blk_id ^ (blk_id >> 5));
 }
 
 /* Find a block mapping */
-vmfs_blk_map_t *vmfs_block_map_find(vmfs_blk_map_t **ht,uint32_t blk_id)
+vmfs_blk_map_t *vmfs_block_map_find(vmfs_blk_map_t **ht,uint64_t blk_id)
 {   
    vmfs_blk_map_t *map;
    u_int bucket;
@@ -212,7 +212,7 @@ vmfs_blk_map_t *vmfs_block_map_find(vmfs_blk_map_t **ht,uint32_t blk_id)
 }
 
 /* Get a block mapping */
-vmfs_blk_map_t *vmfs_block_map_get(vmfs_blk_map_t **ht,uint32_t blk_id)
+vmfs_blk_map_t *vmfs_block_map_get(vmfs_blk_map_t **ht,uint64_t blk_id)
 {
    vmfs_blk_map_t *map;
    u_int bucket;
@@ -237,7 +237,7 @@ vmfs_blk_map_t *vmfs_block_map_get(vmfs_blk_map_t **ht,uint32_t blk_id)
 /* Store block mapping of an inode */
 static void vmfs_fsck_store_block(const vmfs_inode_t *inode,
                                   uint32_t pb_blk,
-                                  uint32_t blk_id,
+                                  uint64_t blk_id,
                                   void *opt_arg)
 {
    vmfs_blk_map_t **ht = opt_arg;
@@ -322,7 +322,7 @@ void vmfs_fsck_count_blocks(vmfs_fsck_info_t *fi)
          blk_type = VMFS_BLK_TYPE(map->blk_id);
 
          if ((blk_type != VMFS_BLK_TYPE_FD) && (map->ref_count > 1)) {
-            printf("Block 0x%8.8x is referenced by multiple inodes: \n",
+            printf("Block 0x%8.8lx is referenced by multiple inodes: \n",
                    map->blk_id);
             vmfs_fsck_show_inode_id(map);
          }
@@ -332,7 +332,7 @@ void vmfs_fsck_count_blocks(vmfs_fsck_info_t *fi)
 
          /* Check that block is allocated */
          if (map->status <= 0) {
-            printf("Block 0x%8.8x is used but not allocated.\n",map->blk_id);
+            printf("Block 0x%8.8lx is used but not allocated.\n",map->blk_id);
             fi->unallocated_blocks++;
          }
       }
@@ -417,12 +417,12 @@ void vmfs_fsck_show_orphaned_inodes(vmfs_fsck_info_t *fi)
 void vmfs_fsck_check_fb_lost(vmfs_bitmap_t *b,uint32_t addr,void *opt)
 {
    vmfs_fsck_info_t *fi = opt;
-   uint32_t blk_id;
+   uint64_t blk_id;
 
    blk_id = VMFS_BLK_FB_BUILD(addr, 0);
 
    if (!vmfs_block_map_find(fi->blk_map,blk_id)) {
-      printf("File Block 0x%8.8x is lost.\n",blk_id);
+      printf("File Block 0x%8.8lx is lost.\n",blk_id);
       fi->lost_blocks++;
    }
 }
@@ -432,7 +432,7 @@ void vmfs_fsck_check_sb_lost(vmfs_bitmap_t *b,uint32_t addr,void *opt)
 {
    vmfs_fsck_info_t *fi = opt;
    uint32_t entry,item;
-   uint32_t blk_id;
+   uint64_t blk_id;
 
    entry = addr / b->bmh.items_per_bitmap_entry;
    item  = addr % b->bmh.items_per_bitmap_entry;
@@ -440,7 +440,7 @@ void vmfs_fsck_check_sb_lost(vmfs_bitmap_t *b,uint32_t addr,void *opt)
    blk_id = VMFS_BLK_SB_BUILD(entry, item, 0);
 
    if (!vmfs_block_map_find(fi->blk_map,blk_id)) {
-      printf("Sub-Block 0x%8.8x is lost.\n",blk_id);
+      printf("Sub-Block 0x%8.8lx is lost.\n",blk_id);
       fi->lost_blocks++;
    }
 }
@@ -450,7 +450,7 @@ void vmfs_fsck_check_pb_lost(vmfs_bitmap_t *b,uint32_t addr,void *opt)
 {
    vmfs_fsck_info_t *fi = opt;
    uint32_t entry,item;
-   uint32_t blk_id;
+   uint64_t blk_id;
 
    entry = addr / b->bmh.items_per_bitmap_entry;
    item  = addr % b->bmh.items_per_bitmap_entry;
@@ -458,7 +458,7 @@ void vmfs_fsck_check_pb_lost(vmfs_bitmap_t *b,uint32_t addr,void *opt)
    blk_id = VMFS_BLK_PB_BUILD(entry, item, 0);
 
    if (!vmfs_block_map_find(fi->blk_map,blk_id)) {
-      printf("Pointer Block 0x%8.8x is lost.\n",blk_id);
+      printf("Pointer Block 0x%8.8lx is lost.\n",blk_id);
       fi->lost_blocks++;
    }
 }

@@ -117,8 +117,8 @@ struct vmfs_inode {
    uint32_t zla,tbz,cow;
    uint32_t rdm_id;
    union {
-     uint32_t blocks[VMFS_INODE_BLK_COUNT];
-     char content[VMFS_INODE_BLK_COUNT * sizeof(uint32_t)];
+     uint64_t blocks[VMFS_INODE_BLK_COUNT];
+     char content[VMFS_INODE_BLK_COUNT * sizeof(uint64_t)];
    };
 
    /* In-core inode information */
@@ -131,17 +131,17 @@ struct vmfs_inode {
 /* Callback function for vmfs_inode_foreach_block() */
 typedef void (*vmfs_inode_foreach_block_cbk_t)(const vmfs_inode_t *inode,
                                                uint32_t pb_blk,
-                                               uint32_t blk_id,
+                                               uint64_t blk_id,
                                                void *opt_arg);
 
 /* Update an inode on disk */
 int vmfs_inode_update(const vmfs_inode_t *inode,int update_blk_list);
 
 /* Get inode corresponding to a block id */
-int vmfs_inode_get(const vmfs_fs_t *fs,uint32_t blk_id,vmfs_inode_t *inode);
+int vmfs_inode_get(const vmfs_fs_t *fs,uint64_t blk_id,vmfs_inode_t *inode);
 
 /* Acquire an inode */
-vmfs_inode_t *vmfs_inode_acquire(const vmfs_fs_t *fs,uint32_t blk_id);
+vmfs_inode_t *vmfs_inode_acquire(const vmfs_fs_t *fs,uint64_t blk_id);
 
 /* Release an inode */
 void vmfs_inode_release(vmfs_inode_t *inode);
@@ -153,10 +153,10 @@ int vmfs_inode_alloc(vmfs_fs_t *fs,u_int type,mode_t mode,vmfs_inode_t **inode);
  * Get block ID corresponding the specified position. Pointer block
  * resolution is transparently done here.
  */
-int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint32_t *blk_id);
+int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id);
 
 /* Get a block for writing corresponding to the specified position */
-int vmfs_inode_get_wrblock(vmfs_inode_t *inode,off_t pos,uint32_t *blk_id);
+int vmfs_inode_get_wrblock(vmfs_inode_t *inode,off_t pos,uint64_t *blk_id);
 
 /* Truncate file */
 int vmfs_inode_truncate(vmfs_inode_t *inode,off_t new_len);
@@ -169,7 +169,7 @@ int vmfs_inode_foreach_block(const vmfs_inode_t *inode,
 int vmfs_inode_stat(const vmfs_inode_t *inode,struct stat *buf);
 
 /* Get inode status */
-int vmfs_inode_stat_from_blkid(const vmfs_fs_t *fs,uint32_t blk_id,
+int vmfs_inode_stat_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id,
                                struct stat *buf);
 
 /* Change permissions */

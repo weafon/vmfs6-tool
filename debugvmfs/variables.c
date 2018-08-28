@@ -828,16 +828,16 @@ static char *get_value_mode(void *value, short len)
 static char *get_value_blocks(void *value, short len)
 {
    char *buf, *b;
-   int i, num = FIELD(vmfs_inode_t, blocks) / sizeof(uint32_t);
+   int i, num = FIELD(vmfs_inode_t, blocks) / sizeof(uint64_t);
 
    vmfs_inode_t *inode = (vmfs_inode_t *) value;
    while (num > 0 && !inode->blocks[num - 1])
       num--;
 
-   b = buf = malloc(sizeof("0x00000000") * num + 1);
+   b = buf = malloc(sizeof("0x0000000000000000") * num + 1);
    for (i = 0; i < num; i++) {
-      sprintf(b, "0x%08x%c", inode->blocks[i], (i + 1) % 4 ? ' ' : '\n');
-      b += sizeof("0x00000000");
+      sprintf(b, "0x%16x%c", inode->blocks[i], (i + 1) % 4 ? ' ' : '\n');
+      b += sizeof("0x0000000000000000");
    }
 
    return buf;
