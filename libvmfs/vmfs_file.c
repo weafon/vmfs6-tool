@@ -159,7 +159,10 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
    int err;
 
    if (f->flags & VMFS_FILE_FLAG_FD)
+   {
+   	printf("file read?\n");
       return pread(f->fd, buf, len, pos);
+     }
 
    /* We don't handle RDM files */
    if (f->inode->type == VMFS_FILE_TYPE_RDM)
@@ -170,7 +173,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
    blk_size = vmfs_fs_get_blocksize(fs);
    file_size = vmfs_file_get_size(f);
-
+	printf("%s call with blk size %lu file size %lu\n", __FUNCTION__, blk_size, file_size);
    while(len > 0) {
       if (pos >= file_size)
          break;
@@ -203,7 +206,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
          /* File-Block */
          case VMFS_BLK_TYPE_FB:
 #if WF_VMFS6 == 1
-		case VMFS_BLK_TYPE_XX:
+		case VMFS_BLK_TYPE_PB2:
 #endif
             exp_len = m_min(len,file_size - pos);
             res = vmfs_block_read_fb(fs,blk_id,pos,buf,exp_len);
@@ -230,7 +233,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
             fprintf(stderr,"VMFS: unknown block type 0x%2.2x\n",blk_type);
             return(-EIO);
       }
-		printf("%s : call end with res %ld\n", __FUNCTION__, res);
+		printf("%s : call end with res %ld for type %d\n", __FUNCTION__, res, blk_type);
       /* Error while reading block, abort immediately */
       if (res < 0)
          return(res);
@@ -341,12 +344,13 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
          fprintf(stderr,"vmfs_file_dump: problem reading input file.\n");
          return(-1);
       }
-
+/*
       if (fwrite(buf,1,res,fd_out) != res) {
          fprintf(stderr,"vmfs_file_dump: error writing output file.\n");
          return(-1);
       }
-
+*/
+		hexdump(buf, res);
       if (res < clen)
          break;
    }

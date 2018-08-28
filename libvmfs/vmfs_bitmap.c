@@ -150,7 +150,8 @@ off_t vmfs_bitmap_get_item_pos(vmfs_bitmap_t *b,uint32_t entry,uint32_t item)
    area = addr / items_per_area;
 
    pos  = b->bmh.hdr_size + (area * b->bmh.area_size);
-   pos += b->bmh.bmp_entries_per_area * VMFS_BITMAP_ENTRY_SIZE;
+   pos += b->bmh.bmp_entries_per_area * VMFS_BITMAP_ENTRY_SIZE; 
+//	pos += b->bmh.bmp_enteries_per_area * (b->bmh.items_per_bitmap_entry* b->bmh.data_size);
    pos += (addr % items_per_area) * b->bmh.data_size;
 
    return(pos);
@@ -160,8 +161,13 @@ off_t vmfs_bitmap_get_item_pos(vmfs_bitmap_t *b,uint32_t entry,uint32_t item)
 bool vmfs_bitmap_get_item(vmfs_bitmap_t *b, uint32_t entry, uint32_t item,
                           u_char *buf)
 {
+	bool ret;
+	uint32_t s;
    off_t pos = vmfs_bitmap_get_item_pos(b,entry,item);
-   return(vmfs_file_pread(b->f,buf,b->bmh.data_size,pos) == b->bmh.data_size);
+   printf("%s : called %u pos 0x%08lx\n", __FUNCTION__, b->bmh.data_size, pos);
+   ret = ((s=vmfs_file_pread(b->f,buf,b->bmh.data_size,pos)) == b->bmh.data_size);
+   printf("%s : %u leave\n", __FUNCTION__, s);   
+   return ret;
 }
 
 /* Write a bitmap given its entry and item numbers */

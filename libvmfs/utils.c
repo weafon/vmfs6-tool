@@ -261,7 +261,7 @@ void hexdump(const unsigned char* data, int len)
 				printf("%02x ", (unsigned char)data[i*16+j]);
 			for(j=0;j<16;j++)
 			{
-				if (data[i*16+j]>32)
+				if ((data[i*16+j]>=32)&&(data[i*16+j]<128))
 					printf("%c", data[i*16+j]);			
 				else
 					printf(".");

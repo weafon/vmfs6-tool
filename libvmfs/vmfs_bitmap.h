@@ -25,6 +25,8 @@
 #define VMFS_BITMAP_MAGIC_SBC  0x10c00003
 #define VMFS_BITMAP_MAGIC_PBC  0x10c00004
 #define VMFS_BITMAP_MAGIC_FDC  0x10c00005
+#define VMFS_BITMAP_MAGIC_PB2  0x10c00006
+
 
 /* === Bitmap header === */
 struct vmfs_bitmap_header {

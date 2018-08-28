@@ -260,7 +260,10 @@ ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
 	printf("%s : blk_id 0x%016lx offset %u clen %u\n", __FUNCTION__,  blk_id, offset, clen);
    sbc_entry = VMFS_BLK_SB_ENTRY(blk_id);
    sbc_item  = VMFS_BLK_SB_ITEM(blk_id);
-	printf("%s : entry %lu %u item %lu %u\n", __FUNCTION__, VMFS_BLK_SB_ENTRY(blk_id), sbc_entry, VMFS_BLK_SB_ITEM(blk_id), sbc_item);
+	printf("%s : entry %lu %u item %lu %u (%lx %lx)\n", __FUNCTION__, 
+		VMFS_BLK_SB_ENTRY(blk_id), sbc_entry, VMFS_BLK_SB_ITEM(blk_id), sbc_item,
+		VMFS_BLK_VALUE(blk_id, VMFS_BLK_SB_ITEM_LSB_MASK),
+		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_SB_ITEM_LSB_MASK), VMFS_BLK_SB_ITEM_VALUE_LSB_MASK) );
    if (!vmfs_bitmap_get_item(fs->sbc,sbc_entry,sbc_item,tmpbuf))
       return(-EIO);
 

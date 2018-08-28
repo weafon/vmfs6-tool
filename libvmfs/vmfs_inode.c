@@ -52,7 +52,7 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    inode->id        = read_le32(buf,VMFS_INODE_OFS_ID);
    inode->id2       = read_le32(buf,VMFS_INODE_OFS_ID2);
-   printf("metadata done for inode id %d\n", inode->id);      
+   printf("metadata done for inode id %x\n", inode->id);      
    inode->nlink     = read_le32(buf,VMFS_INODE_OFS_NLINK);
    inode->type      = read_le32(buf,VMFS_INODE_OFS_TYPE);
    inode->flags     = read_le32(buf,VMFS_INODE_OFS_FLAGS);
@@ -85,6 +85,12 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
          if (inode->blocks[i] == 0)	      
          	break;
+         if (inode->blocks[i]==5)
+         {
+         	printf("Force set sbc to block 0x8d. blk 0x59b0 -> %016lx !!!\n", VMFS_BLK_FB_BUILD(0x59b0, 0));
+         	inode->blocks[i] = VMFS_BLK_FB_BUILD(0x8d,0);
+         	
+         }
 		 printf("%d:%016lx\n", i, inode->blocks[i]);				
          	
        }
@@ -151,7 +157,7 @@ int vmfs_inode_update(const vmfs_inode_t *inode,int update_blk_list)
 int vmfs_inode_get(const vmfs_fs_t *fs,uint64_t blk_id,vmfs_inode_t *inode)
 {
    DECL_ALIGNED_BUFFER_WOL(buf,VMFS_INODE_SIZE);
-
+	printf("%s : called\n", __FUNCTION__);
    if (VMFS_BLK_TYPE(blk_id) != VMFS_BLK_TYPE_FD)
       return(-1);
 
@@ -319,7 +325,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
       case VMFS_BLK_TYPE_FB:
       case VMFS_BLK_TYPE_SB:
 #if WF_VMFS6==1   
-	  case VMFS_BLK_TYPE_XX:
+	  case VMFS_BLK_TYPE_PB2:
 #endif   
       
          blk_index = pos / inode->blk_size;

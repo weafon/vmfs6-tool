@@ -55,7 +55,7 @@ struct vmfs_dirent_raw {
 
 struct vmfs_dirent {
    uint32_t type;
-   uint32_t block_id;
+   uint32_t block_id; // for id of inode
    uint32_t record_id;
    char name[129];
 };

@@ -195,7 +195,7 @@ static int vmfs_dir_cache_entries(vmfs_dir_t *d)
       free(d->buf);
       return(-1);
    }
-
+	hexdump(d->buf, dir_size);
    return(0);
 }
 
@@ -255,6 +255,7 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 {
    u_char *buf;
 	uint32_t off=0;   
+	printf("%s called\n", __FUNCTION__);
    if (d == NULL)
       return(NULL);
 #if WF_VMFS6 == 1      
@@ -273,6 +274,7 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
       if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
                            off+d->pos*sizeof(_buf)) != sizeof(_buf)))
          return(NULL);
+	   hexdump(_buf, sizeof(_buf));         
       buf = _buf;
    }
 

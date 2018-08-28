@@ -99,11 +99,12 @@ static vmfs_bitmap_t *vmfs_open_meta_file(vmfs_dir_t *root_dir, char *name,
       fprintf(stderr, "Unable to open %s.\n", desc);
       return NULL;
    }
-
+/*
    if (bitmap->bmh.items_per_bitmap_entry > max_item) {
-      fprintf(stderr, "Unsupported number of items per entry in %s.\n", desc);
+      fprintf(stderr, "Unsupported number of items per entry in %s. %u %u\n", desc, bitmap->bmh.items_per_bitmap_entry, max_item);
       return NULL;
    }
+  */
 #if WF_VMFS6==1   
    if (bitmap->bmh.total_items==0)
    {
@@ -138,7 +139,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       return(-1);
    }
    if (fs->fbb->bmh.total_items > VMFS_BLK_FB_MAX_ITEM) {
-      fprintf(stderr, "Unsupported number of items in file-block bitmap (FBB).\n");
+      fprintf(stderr, "Unsupported number of items in file-block bitmap (FBB) (0x%x 0x%lx).\n", fs->fbb->bmh.total_items, VMFS_BLK_FB_MAX_ITEM);
       return(-1);
    }
 
