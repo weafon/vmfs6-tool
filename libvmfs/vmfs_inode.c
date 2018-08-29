@@ -52,7 +52,7 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    inode->id        = read_le32(buf,VMFS_INODE_OFS_ID);
    inode->id2       = read_le32(buf,VMFS_INODE_OFS_ID2);
-   printf("metadata done for inode id %x\n", inode->id);      
+   printf("metadata done for inode id 0x%x\n", inode->id);      
    inode->nlink     = read_le32(buf,VMFS_INODE_OFS_NLINK);
    inode->type      = read_le32(buf,VMFS_INODE_OFS_TYPE);
    inode->flags     = read_le32(buf,VMFS_INODE_OFS_FLAGS);
@@ -85,12 +85,6 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
          if (inode->blocks[i] == 0)	      
          	break;
-//         if (inode->blocks[i]==5)
-//         {
- //        	printf("Force set sbc to block 0x8d. blk 0x59b0 -> %016lx !!!\n", VMFS_BLK_FB_BUILD(0x59b0, 0));
-  //       	inode->blocks[i] = VMFS_BLK_FB_BUILD(0x8d,0);
-         	
-    //     }
 		 printf("%d:%016lx\n", i, inode->blocks[i]);				
          	
        }

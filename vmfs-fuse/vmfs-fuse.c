@@ -245,12 +245,14 @@ static void vmfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
    }
    fp = fopen("/tmp/fuse.log","a+");
 
-
+	fprintf(fp, "call %s\n", __FUNCTION__);
    if ((entry = vmfs_dir_read((vmfs_dir_t *)(unsigned long)fi->fh))) {
       st.st_mode = vmfs_file_type2mode(entry->type);
       st.st_ino = blkid2ino(entry->block_id);
-      fprintf(fp, "fuse readdir ino %ld block id %d name %s\n", st.st_ino, entry->block_id, entry->name);      
+      fprintf(fp, "fuse readdir ino %ld block id %d name %s type %d\n", st.st_ino, entry->block_id, entry->name, entry->type);      
       sz = fuse_add_direntry(req, buf, size, entry->name, &st, off + 1);
+      fprintf(fp, "fuse add dir %d\n", sz);      
+      
       fuse_reply_buf(req, buf, sz);
    } else {
       fprintf(fp, "fail to fuse dir read\n");
