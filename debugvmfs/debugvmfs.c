@@ -299,7 +299,7 @@ static int cmd_get_file_block(vmfs_dir_t *base_dir,int argc,char *argv[])
    pos = (off_t)strtoull(argv[1],NULL,16);
 
    if (!vmfs_inode_get_block(f->inode,pos,&blk_id)) {
-      printf("0x%8.8x\n",blk_id);
+      printf("0x%8.8lx\n",blk_id);
    } else {
       fprintf(stderr,"Unable to get block info\n");
       ret = -1;
@@ -398,7 +398,7 @@ static int cmd_read_block(vmfs_dir_t *base_dir,int argc,char *argv[])
 
       if (len != 0) {
          if (fwrite(buf,1,len,stdout) != len)
-            fprintf(stderr,"Block 0x%8.8x: incomplete write.\n",blk_id);
+            fprintf(stderr,"Block 0x%8.8lx: incomplete write.\n",blk_id);
       }
    }
 

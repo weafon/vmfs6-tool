@@ -36,7 +36,7 @@ static ssize_t vmfs_vol_read(const vmfs_device_t *dev,off_t pos,
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
    pos += vol->vmfs_base + 0x1000000; 
-	printf("abs read loc 0x%lx len %d\n", pos, len);
+	printf("abs read loc 0x%lx len %ld\n", pos, len);
    return(m_pread(vol->fd,buf,len,pos));
 }
 

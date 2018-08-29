@@ -50,10 +50,10 @@ enum vmfs_block_type {
  * type and the TBZ flag, so we'll consider they are flags of some sort,
  * and will display them as such.
  */
-#define VMFS_BLK_FB_ITEM_LSB_MASK   0x07f8000000000000UL  //0xffffffc0 
-#define VMFS_BLK_FB_ITEM_MSB_MASK   0x00000000ffffc000UL  //0xffffffc0
-#define VMFS_BLK_FB_ITEM_VALUE_LSB_MASK  0x0ffUL   //0xffffffc0 
-#define VMFS_BLK_FB_ITEM_VALUE_MSB_MASK  0x03ffff00UL   //0xffffffc0
+#define VMFS_BLK_FB_ITEM_LSB_MASK   0x0ff8000000000000UL  //0xffffffc0 
+#define VMFS_BLK_FB_ITEM_MSB_MASK   0x00000000ffff8000UL  //0xffffffc0
+#define VMFS_BLK_FB_ITEM_VALUE_LSB_MASK  0x01ffUL   //0xffffffc0 
+#define VMFS_BLK_FB_ITEM_VALUE_MSB_MASK  0x03fffe00UL   //0xffffffc0
 
 #define VMFS_BLK_FB_FLAGS_MASK 0x0000000000000038UL
 
@@ -98,7 +98,7 @@ enum vmfs_block_type {
 #define VMFS_BLK_SB_ITEM_MSB_MASK 0x0000000000000FC0UL
 */
 
-#define VMFS_BLK_SB_ITEM_LSB_MASK 0x01e0000000000000UL
+#define VMFS_BLK_SB_ITEM_LSB_MASK 0x0f00000000000000UL
 #define VMFS_BLK_SB_ENTRY_MASK    0x0000000000003FC0UL
 #define VMFS_BLK_SB_FLAGS_MASK    0x0000000000000038UL
 #define VMFS_BLK_SB_ITEM_MSB_MASK 0x000000000003C000UL
@@ -146,6 +146,32 @@ enum vmfs_block_type {
     VMFS_BLK_FILL(item, VMFS_BLK_PB_ITEM_MASK) | \
     VMFS_BLK_FILL(flags, VMFS_BLK_PB_FLAGS_MASK) | \
     VMFS_BLK_TYPE_PB)
+
+
+/* Pointer-2-Block
+ * { unsigned int item:5;
+ *   unsigned int entry:21;
+ *   unsigned int flags:3;
+ *   unsigned int type:3; }
+ */
+
+#define VMFS_BLK_PB2_ITEM_MASK  0xf8000000
+#define VMFS_BLK_PB2_ENTRY_MASK 0x07ffffc0
+#define VMFS_BLK_PB2_FLAGS_MASK 0x00000038
+
+#define VMFS_BLK_PB2_ITEM(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_PB2_ITEM_MASK)
+#define VMFS_BLK_PB2_ENTRY(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_PB2_ENTRY_MASK)
+#define VMFS_BLK_PB2_FLAGS(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_PB2_FLAGS_MASK)
+
+#define VMFS_BLK_PB2_MAX_ITEM VMFS_BLK_MAX_VALUE(VMFS_BLK_PB2_ITEM_MASK)
+#define VMFS_BLK_PB2_MAX_ENTRY VMFS_BLK_MAX_VALUE(VMFS_BLK_PB2_ENTRY_MASK)
+
+#define VMFS_BLK_PB2_BUILD(entry, item, flags) \
+   (VMFS_BLK_FILL(entry, VMFS_BLK_PB2_ENTRY_MASK) | \
+    VMFS_BLK_FILL(item, VMFS_BLK_PB2_ITEM_MASK) | \
+    VMFS_BLK_FILL(flags, VMFS_BLK_PB2_FLAGS_MASK) | \
+    VMFS_BLK_TYPE_PB2)
+
 
 /* File Descriptor
  * { unsigned int item:10;

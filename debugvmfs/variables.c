@@ -836,7 +836,7 @@ static char *get_value_blocks(void *value, short len)
 
    b = buf = malloc(sizeof("0x0000000000000000") * num + 1);
    for (i = 0; i < num; i++) {
-      sprintf(b, "0x%16x%c", inode->blocks[i], (i + 1) % 4 ? ' ' : '\n');
+      sprintf(b, "0x%16lx%c", inode->blocks[i], (i + 1) % 4 ? ' ' : '\n');
       b += sizeof("0x0000000000000000");
    }
 

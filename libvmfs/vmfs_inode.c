@@ -85,12 +85,12 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
          if (inode->blocks[i] == 0)	      
          	break;
-         if (inode->blocks[i]==5)
-         {
-         	printf("Force set sbc to block 0x8d. blk 0x59b0 -> %016lx !!!\n", VMFS_BLK_FB_BUILD(0x59b0, 0));
-         	inode->blocks[i] = VMFS_BLK_FB_BUILD(0x8d,0);
+//         if (inode->blocks[i]==5)
+//         {
+ //        	printf("Force set sbc to block 0x8d. blk 0x59b0 -> %016lx !!!\n", VMFS_BLK_FB_BUILD(0x59b0, 0));
+  //       	inode->blocks[i] = VMFS_BLK_FB_BUILD(0x8d,0);
          	
-         }
+    //     }
 		 printf("%d:%016lx\n", i, inode->blocks[i]);				
          	
        }
@@ -320,13 +320,11 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
       zla -= VMFS5_ZLA_BASE;
    } else
       vmfs5_extension = 0;
-
+	printf("%s : call for type-zla %d pos %016lx\n", __FUNCTION__, zla, pos);
    switch(zla) {
       case VMFS_BLK_TYPE_FB:
       case VMFS_BLK_TYPE_SB:
-#if WF_VMFS6==1   
-	  case VMFS_BLK_TYPE_PB2:
-#endif   
+ 
       
          blk_index = pos / inode->blk_size;
          
@@ -335,6 +333,40 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
 
          *blk_id = inode->blocks[blk_index];
          break;
+#if WF_VMFS6==1   
+	  case VMFS_BLK_TYPE_PB2:
+	  {
+		  DECL_ALIGNED_BUFFER_WOL(buf,fs->pb2->bmh.data_size);
+		  uint32_t pb_blk_id;
+		  uint32_t blk_per_pb;
+		  u_int pb_index;
+		  u_int sub_index;
+		  
+		  blk_per_pb = fs->pb2->bmh.data_size / sizeof(uint64_t);
+		  blk_index = pos / inode->blk_size;
+		  
+		  pb_index	= blk_index / blk_per_pb;
+		  sub_index = blk_index % blk_per_pb;
+		  
+		  if (pb_index >= VMFS_INODE_BLK_COUNT)
+			 return(-EINVAL);
+		  
+		  pb_blk_id = inode->blocks[pb_index];
+		  
+		  if (!pb_blk_id)
+			 break;
+
+		  if (!vmfs_bitmap_get_item(fs->pb2,
+									VMFS_BLK_PB2_ENTRY(pb_blk_id),
+									VMFS_BLK_PB2_ITEM(pb_blk_id),
+									buf))
+			 return(-EIO);
+	  
+		  *blk_id = read_le64(buf,sub_index*sizeof(uint64_t));
+		  break;
+
+	  }
+#endif  
 
       case VMFS_BLK_TYPE_PB:
       {

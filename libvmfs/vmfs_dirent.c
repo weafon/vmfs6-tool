@@ -255,7 +255,7 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 {
    u_char *buf;
 	uint32_t off=0;   
-	printf("%s called\n", __FUNCTION__);
+//	printf("%s called\n", __FUNCTION__);
    if (d == NULL)
       return(NULL);
 #if WF_VMFS6 == 1      
@@ -264,25 +264,23 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
    else
 	   off=0x11040 - 2*VMFS_DIRENT_SIZE;
 #endif
-	
-   if (d->buf) {
-      if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
-         return(NULL);
-      buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
-   } else {
-      u_char _buf[VMFS_DIRENT_SIZE];
-      if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
-                           off+d->pos*sizeof(_buf)) != sizeof(_buf)))
-         return(NULL);
-	   hexdump(_buf, sizeof(_buf));         
-      buf = _buf;
-   }
-
-   vmfs_dirent_read(&d->dirent,buf);
-   if (d->dirent.block_id == 0)
-   	return (NULL);
-   d->pos++;
-
+	do {
+	   printf("%s : call for off %u d->pos %d\n", __FUNCTION__, off, d->pos);	
+	   if (d->buf) {
+	      if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
+	         return(NULL);
+	      buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
+	   } else {
+	      u_char _buf[VMFS_DIRENT_SIZE];
+	      printf("%s : call for file_pread off %u d->pos %d\n", __FUNCTION__, off, d->pos);
+	      if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
+	                           off+d->pos*sizeof(_buf)) != sizeof(_buf)))
+	         return(NULL);
+	      buf = _buf;
+	   }
+	   vmfs_dirent_read(&d->dirent,buf);
+		d->pos++;
+   }while(d->dirent.block_id == 0);
    return &d->dirent;
 }
 

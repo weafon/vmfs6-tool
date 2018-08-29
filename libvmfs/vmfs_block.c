@@ -257,7 +257,7 @@ ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
 
    offset = pos % fs->sbc->bmh.data_size;
    clen   = m_min(fs->sbc->bmh.data_size - offset,len);
-	printf("%s : blk_id 0x%016lx offset %u clen %u\n", __FUNCTION__,  blk_id, offset, clen);
+	printf("%s : blk_id 0x%016lx offset %u clen %lu\n", __FUNCTION__,  blk_id, offset, clen);
    sbc_entry = VMFS_BLK_SB_ENTRY(blk_id);
    sbc_item  = VMFS_BLK_SB_ITEM(blk_id);
 	printf("%s : entry %lu %u item %lu %u (%lx %lx)\n", __FUNCTION__, 

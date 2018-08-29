@@ -33,7 +33,8 @@
 struct vmfs_dirent_raw {
    uint32_t type;
    uint32_t block_id;
-   uint64_t record_id;
+   uint32_t record_id;
+   uint32_t unknown;
    uint64_t off_in_file;
    char name[128];
 } __attribute__((packed));

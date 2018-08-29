@@ -29,6 +29,7 @@
 #define VMFS_FDC_FILENAME  ".fdc.sf"
 #define VMFS_PBC_FILENAME  ".pbc.sf"
 #define VMFS_SBC_FILENAME  ".sbc.sf"
+#define VMFS_PB2_FILENAME  ".pb2.sf"
 
 /* Read a block from the filesystem */
 ssize_t vmfs_fs_read(const vmfs_fs_t *fs,uint32_t blk,off_t offset,
@@ -154,6 +155,15 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
                                  "pointer block bitmap (PBC)");
    if (!fs->pbc)
       return(-1);
+
+
+	printf("%s : open pb2\n", __FUNCTION__);
+   fs->pb2 = vmfs_open_meta_file(root_dir, VMFS_PB2_FILENAME,
+                                 VMFS_BLK_PB_MAX_ITEM, VMFS_BLK_PB_MAX_ENTRY,
+                                 "pointer 2nd block bitmap (PB2)");
+   if (!fs->pb2)
+      return(-1);
+
 	printf("%s : open sbc\n", __FUNCTION__);
    fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
                                  VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
@@ -330,6 +340,7 @@ void vmfs_fs_close(vmfs_fs_t *fs)
    vmfs_bitmap_close(fs->fbb);
    vmfs_bitmap_close(fs->fdc);
    vmfs_bitmap_close(fs->pbc);
+   vmfs_bitmap_close(fs->pb2);   
    vmfs_bitmap_close(fs->sbc);
 
    vmfs_fs_sync_inodes(fs);

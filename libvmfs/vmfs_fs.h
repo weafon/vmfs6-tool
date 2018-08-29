@@ -92,7 +92,7 @@ struct vmfs_fs {
    vmfs_device_t *dev;
 
    /* Meta-files containing file system structures */
-   vmfs_bitmap_t *fbb,*sbc,*pbc,*fdc;
+   vmfs_bitmap_t *fbb,*sbc,*pbc,*fdc,*pb2;
 
    /* Heartbeat used to lock meta-data */
    vmfs_heartbeat_t hb;
