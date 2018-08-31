@@ -324,7 +324,7 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
    u_char *buf;
    ssize_t res;
    size_t clen,buf_len;
-
+//	bool isFirst=true;
    if (f->flags & VMFS_FILE_FLAG_FD)
       return(-EIO);
 
@@ -350,8 +350,8 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
          return(-1);
       }
 */
-		hexdump(buf, res);
-		break;
+
+	hexdump(buf, res);
       if (res < clen)
          break;
    }

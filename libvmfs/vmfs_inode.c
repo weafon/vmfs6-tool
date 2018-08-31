@@ -389,8 +389,9 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
                                    VMFS_BLK_SB_ITEM(pb_blk_id),
                                    buf))
             return(-EIO);
-
-         *blk_id = read_le64(buf,sub_index*sizeof(uint32_t));
+//		hexdump(buf, fs->pbc->bmh.data_size);
+         *blk_id = read_le64(buf,sub_index*sizeof(uint64_t));
+		printf("PB pb idx %u sub idx %u get blk_id 0x%lx\n", pb_index, sub_index, *blk_id);         
          break;
       }
 
