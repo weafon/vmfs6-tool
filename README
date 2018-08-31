@@ -1,5 +1,11 @@
 - The project is cloned from Glandium.org. More introductions can be found in https://glandium.org/projects/vmfs-tools/
+
 - Most code is developped by Christophe Fillot <cf (at) utc.fr> and Mike Hommey <mh (at) glandium.org>.
+
 - I cloned the project for the modification of vmfs6 supporting.
-- The code in the project is only for vmfs6 for now since the format of vmfs6 changed significantly.
+
+- The branch master is the original code cloned from Glandium. Experimental code for vmfs6 is in Branch vmfs6-64.
+
+- The code in the branch is only for vmfs6 for now since the format of vmfs6 changed significantly.
+
 - It is experimental code. Only debugvmfs and vmfsfuse have been applied on a few cases.
