@@ -25,9 +25,7 @@ enum vmfs_block_type {
    VMFS_BLK_TYPE_SB,     /* Sub-Block */
    VMFS_BLK_TYPE_PB,     /* Pointer Block */
    VMFS_BLK_TYPE_FD,     /* File Descriptor */
-#if WF_VMFS6==1   
    VMFS_BLK_TYPE_PB2,
-#endif   
    VMFS_BLK_TYPE_MAX,
 };
 
@@ -41,7 +39,7 @@ enum vmfs_block_type {
 /* Extract block type from a block ID */
 #define VMFS_BLK_TYPE(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_TYPE_MASK)
 
-/* File-Block
+/* File-Block (not actually updated for vmfs6)
  * { unsigned int item:26;
  *   unsigned int flags:3;
  *   unsigned int type:3; }
@@ -130,10 +128,12 @@ enum vmfs_block_type {
  *   unsigned int flags:3;
  *   unsigned int type:3; }
  */
-#define VMFS_BLK_PB_ITEM_MASK  0xf000000000000000UL
-#define VMFS_BLK_PB_ENTRY_MASK 0x000000000fffffc0UL
-#define VMFS_BLK_PB_FLAGS_MASK 0x0000000000000038UL
-
+//#define VMFS_BLK_PB_ITEM_MASK  0xf000000000000000UL
+//#define VMFS_BLK_PB_ENTRY_MASK 0x000000000fffffc0UL
+//#define VMFS_BLK_PB_FLAGS_MASK 0x0000000000000038UL
+#define VMFS_BLK_PB_ITEM_MASK  0xf0000000
+#define VMFS_BLK_PB_ENTRY_MASK 0x0fffffc0
+#define VMFS_BLK_PB_FLAGS_MASK 0x00000038
 #define VMFS_BLK_PB_ITEM(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_PB_ITEM_MASK)
 #define VMFS_BLK_PB_ENTRY(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_PB_ENTRY_MASK)
 #define VMFS_BLK_PB_FLAGS(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_PB_FLAGS_MASK)

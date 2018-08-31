@@ -33,6 +33,13 @@
 #define LE_AND_NO_ALIGN 1
 #endif
 
+#if VMFS6_DEBUG == 1
+#define dprintf(fmt, ...) printf("VMFS6@%s(%d):" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else
+#define dprintf(fmt, ...)	do{}while(0);
+#endif
+
+
 /* Read a 16-bit word in little endian format */
 static inline uint16_t read_le16(const u_char *p,int offset)
 {

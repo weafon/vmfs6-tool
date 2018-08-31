@@ -151,7 +151,6 @@ off_t vmfs_bitmap_get_item_pos(vmfs_bitmap_t *b,uint32_t entry,uint32_t item)
 
    pos  = b->bmh.hdr_size + (area * b->bmh.area_size);
    pos += b->bmh.bmp_entries_per_area * VMFS_BITMAP_ENTRY_SIZE; 
-//	pos += b->bmh.bmp_enteries_per_area * (b->bmh.items_per_bitmap_entry* b->bmh.data_size);
    pos += (addr % items_per_area) * b->bmh.data_size;
 
    return(pos);
@@ -161,13 +160,9 @@ off_t vmfs_bitmap_get_item_pos(vmfs_bitmap_t *b,uint32_t entry,uint32_t item)
 bool vmfs_bitmap_get_item(vmfs_bitmap_t *b, uint32_t entry, uint32_t item,
                           u_char *buf)
 {
-	bool ret;
-	uint32_t s;
    off_t pos = vmfs_bitmap_get_item_pos(b,entry,item);
-   printf("%s : called data_size 0x%x pos 0x%08lx\n", __FUNCTION__, b->bmh.data_size, pos);
-   ret = ((s=vmfs_file_pread(b->f,buf,b->bmh.data_size,pos)) == b->bmh.data_size);
-   printf("%s : %u leave\n", __FUNCTION__, s);   
-   return ret;
+   dprintf("called data_size 0x%x pos 0x%08lx\n", b->bmh.data_size, pos);   
+   return(vmfs_file_pread(b->f,buf,b->bmh.data_size,pos) == b->bmh.data_size);
 }
 
 /* Write a bitmap given its entry and item numbers */
@@ -524,9 +519,9 @@ static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
 
    if (!f)
       return NULL;
-	printf("%s : called to file_pread\n", __FUNCTION__);
+	dprintf("called to file_pread\n");
    if (vmfs_file_pread(f,buf,buf_len,0) != buf_len) {
-   	printf("%s : fail pread\n", __FUNCTION__);
+   	dprintf("fail pread\n");
       vmfs_file_close(f);
       return NULL;
    }
@@ -535,10 +530,10 @@ static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
       vmfs_file_close(f);
       return NULL;
    }
-   hexdump(buf, buf_len);
+   //hexdump(buf, buf_len);
    vmfs_bmh_read(&b->bmh, buf);
    b->f = f;
-	printf("%s : leave\n", __FUNCTION__);   
+	dprintf("leave\n");   
    return b;
 }
 

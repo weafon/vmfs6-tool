@@ -59,7 +59,7 @@ vmfs_file_t *vmfs_file_open_from_inode(const vmfs_inode_t *inode)
 vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    vmfs_inode_t *inode;
-	printf("%s: blk_id 0x%lx\n", __FUNCTION__, blk_id);
+	dprintf("%s: blk_id 0x%lx\n", __FUNCTION__, blk_id);
    if (!(inode = vmfs_inode_acquire(fs,blk_id)))
       return NULL;
 
@@ -70,7 +70,7 @@ vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 vmfs_file_t *vmfs_file_open_at(vmfs_dir_t *dir,const char *path)
 {
    uint64_t blk_id;
-	printf("%s : search and open %s for read\n", __FUNCTION__, path);
+	dprintf("%s : search and open %s for read\n", __FUNCTION__, path);
    if (!(blk_id = vmfs_dir_resolve_path(dir,path,1)))
       return(NULL);
 
@@ -160,27 +160,27 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
    if (f->flags & VMFS_FILE_FLAG_FD)
    {
-   	printf("file read?\n");
+   	dprintf("file read?\n");
       return pread(f->fd, buf, len, pos);
      }
 
    /* We don't handle RDM files */
    if (f->inode->type == VMFS_FILE_TYPE_RDM)
    {
-   		printf("not handle RDM files\n");
+   		dprintf("not handle RDM files\n");
       return(-EIO);
      }
 
    blk_size = vmfs_fs_get_blocksize(fs);
    file_size = vmfs_file_get_size(f);
-	printf("%s call with blk size %lu file size %lu\n", __FUNCTION__, blk_size, file_size);
+	dprintf("%s call with blk size %lu file size %lu\n", __FUNCTION__, blk_size, file_size);
    while(len > 0) {
       if (pos >= file_size)
          break;
 
       if ((err = vmfs_inode_get_block(f->inode,pos,&blk_id)) < 0)
       {
-      	printf("%s : fail to get block 0x%lx\n", blk_id);
+      	dprintf("%s : fail to get block 0x%lx\n", __FUNCTION__, blk_id);
          return(err);
         }
 
@@ -191,7 +191,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
       blk_type = VMFS_BLK_FB_TBZ(blk_id) ?
                     VMFS_BLK_TYPE_NONE : VMFS_BLK_TYPE(blk_id);
-	  printf("%s : call for pos %ld , got blk_id %lu (0x%lx) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
+	  dprintf("%s : call for pos %ld , got blk_id %lu (0x%lx) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
 
       switch(blk_type) {
          /* Unallocated block */
@@ -205,9 +205,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
          /* File-Block */
          case VMFS_BLK_TYPE_FB:
-#if WF_VMFS6 == 1
 		case VMFS_BLK_TYPE_PB2:
-#endif
             exp_len = m_min(len,file_size - pos);
             res = vmfs_block_read_fb(fs,blk_id,pos,buf,exp_len);
 
@@ -233,7 +231,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
             fprintf(stderr,"VMFS: unknown block type 0x%2.2x\n",blk_type);
             return(-EIO);
       }
-		printf("%s : call end with res %ld for type %d\n", __FUNCTION__, res, blk_type);
+		dprintf("%s : call end with res %ld for type %d\n", __FUNCTION__, res, blk_type);
       /* Error while reading block, abort immediately */
       if (res < 0)
          return(res);
@@ -324,7 +322,6 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
    u_char *buf;
    ssize_t res;
    size_t clen,buf_len;
-//	bool isFirst=true;
    if (f->flags & VMFS_FILE_FLAG_FD)
       return(-EIO);
 
@@ -344,14 +341,13 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
          fprintf(stderr,"vmfs_file_dump: problem reading input file.\n");
          return(-1);
       }
-/*
+
       if (fwrite(buf,1,res,fd_out) != res) {
          fprintf(stderr,"vmfs_file_dump: error writing output file.\n");
          return(-1);
       }
-*/
 
-	hexdump(buf, res);
+//	hexdump(buf, res);
       if (res < clen)
          break;
    }
@@ -386,7 +382,7 @@ int vmfs_file_lstat_at(vmfs_dir_t *dir,const char *path,struct stat *buf)
    const vmfs_dirent_t *entry;
    vmfs_dir_t *d;
    char *name;
-	printf("%s called for path %s\n", __FUNCTION__, path);
+	dprintf("%s called for path %s\n", __FUNCTION__, path);
    name = m_dirname(path);
    d = vmfs_dir_open_at(dir,name);
    free(name);

@@ -253,14 +253,13 @@ ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    DECL_ALIGNED_BUFFER_WOL(tmpbuf,fs->sbc->bmh.data_size);
    uint32_t offset,sbc_entry,sbc_item;
    size_t clen;
-   printf("%s : blk_id 0x%016lx fs->sbc->bmh.data_size %u\n", __FUNCTION__, blk_id, fs->sbc->bmh.data_size);
+   dprintf("blk_id 0x%016lx fs->sbc->bmh.data_size %u\n", blk_id, fs->sbc->bmh.data_size);
 
    offset = pos % fs->sbc->bmh.data_size;
    clen   = m_min(fs->sbc->bmh.data_size - offset,len);
-	printf("%s : blk_id 0x%016lx offset %u clen %lu\n", __FUNCTION__,  blk_id, offset, clen);
    sbc_entry = VMFS_BLK_SB_ENTRY(blk_id);
    sbc_item  = VMFS_BLK_SB_ITEM(blk_id);
-	printf("%s : entry %lu %u item %lu %u (%lx %lx)\n", __FUNCTION__, 
+	dprintf("entry %lu %u item %lu %u (%lx %lx)\n", 
 		VMFS_BLK_SB_ENTRY(blk_id), sbc_entry, VMFS_BLK_SB_ITEM(blk_id), sbc_item,
 		VMFS_BLK_VALUE(blk_id, VMFS_BLK_SB_ITEM_LSB_MASK),
 		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_SB_ITEM_LSB_MASK), VMFS_BLK_SB_ITEM_VALUE_LSB_MASK) );
@@ -325,7 +324,7 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
 
    fb_item = VMFS_BLK_FB_ITEM(blk_id);
 
-	printf("blk id %lx %lx %lx %lx\n", 
+	dprintf("blk id %lx %lx %lx %lx\n", 
 		VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), 
 		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
 		VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), 
@@ -335,7 +334,7 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    if ((n_offset == offset) && (n_clen == clen) &&
        ALIGN_CHECK((uintptr_t)buf,M_DIO_BLK_SIZE))
    {
-	printf("%s.1: fb_item %d n_offset %lu sz %lu\n", __FUNCTION__, fb_item, n_offset, n_clen);   
+	dprintf("1: fb_item %d n_offset %lu sz %lu\n", fb_item, n_offset, n_clen);   
       if (vmfs_fs_read(fs,fb_item,n_offset,buf,n_clen) != n_clen)
          return(-EIO);
 
@@ -345,7 +344,7 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    /* Allocate a temporary buffer and copy result to user buffer */
    if (!(tmpbuf = iobuffer_alloc(n_clen)))
       return(-1);
-	printf("%s.2: fb_item %d n_offset %lu off %lu sz %lu (0x%lx) %lu\n", __FUNCTION__, fb_item, n_offset, offset, n_clen, n_clen, clen);
+	dprintf("2: fb_item %d n_offset %lu off %lu sz %lu (0x%lx) %lu\n", fb_item, n_offset, offset, n_clen, n_clen, clen);
    if (vmfs_fs_read(fs,fb_item,n_offset,tmpbuf,n_clen) != n_clen) {
       iobuffer_free(tmpbuf);
       return(-EIO);

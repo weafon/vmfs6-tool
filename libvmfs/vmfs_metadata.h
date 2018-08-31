@@ -19,11 +19,8 @@
 #define VMFS_METADATA_H
 
 #include <stddef.h>
-#if WF_VMFS6 == 1  
+
 #define VMFS_METADATA_HDR_SIZE  4096 //weafonvmfs6 512
-#else
-#define VMFS_METADATA_HDR_SIZE  512
-#endif
 
 struct vmfs_metadata_hdr_raw {
    uint32_t magic;         /* Magic number */
@@ -35,9 +32,7 @@ struct vmfs_metadata_hdr_raw {
    uuid_t hb_uuid;         /* UUID of locking server */
    uint64_t mtime;
    u_char pad1[0x1c0];     /* Padding/unknown */
-#if WF_VMFS6 == 1   
    u_char pad2[4096-512]; // weafonvmfs6
-#endif   
 } __attribute__((packed));
 
 #define VMFS_MDH_OFS_MAGIC    offsetof(struct vmfs_metadata_hdr_raw, magic)

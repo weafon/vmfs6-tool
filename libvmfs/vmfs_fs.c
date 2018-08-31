@@ -94,20 +94,19 @@ static vmfs_bitmap_t *vmfs_open_meta_file(vmfs_dir_t *root_dir, char *name,
 {
    vmfs_bitmap_t *bitmap;
 
-   printf("%s : call for metafile %s\n", __FUNCTION__, name);
+   dprintf("%s : call for metafile %s\n", __FUNCTION__, name);
    bitmap = vmfs_bitmap_open_at(root_dir, name);
    if (!bitmap) {
       fprintf(stderr, "Unable to open %s.\n", desc);
       return NULL;
    }
-/*
+
    if (bitmap->bmh.items_per_bitmap_entry > max_item) {
       fprintf(stderr, "Unsupported number of items per entry in %s. %u %u\n", desc, bitmap->bmh.items_per_bitmap_entry, max_item);
       return NULL;
    }
-  */
-#if WF_VMFS6==1   
-   if (bitmap->bmh.total_items==0)
+#if 0   
+   if ((bitmap->bmh.total_items==0)&&(strcmp(name,".pbd.sf")==0)) // since pbc.sf may be replaced by .sbc.sf
    {
    		bitmap->bmh.items_per_bitmap_entry = 0x100;
    		bitmap->bmh.total_items = bitmap->bmh.items_per_bitmap_entry* bitmap->bmh.bmp_entries_per_area*bitmap->bmh.area_count;
@@ -115,6 +114,9 @@ static vmfs_bitmap_t *vmfs_open_meta_file(vmfs_dir_t *root_dir, char *name,
    		   	return bitmap;
    	}
 #endif
+	if (bitmap->bmh.total_items==0) // if the bitmap is disabled then total_items will be 0. e.g. pbc.sf in vmfs6
+		return bitmap;
+		
    if ((bitmap->bmh.total_items + bitmap->bmh.items_per_bitmap_entry - 1) /
         bitmap->bmh.items_per_bitmap_entry > max_entry) {
       fprintf(stderr,"Unsupported number of entries in %s.\n", desc);
@@ -134,7 +136,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       fprintf(stderr,"VMFS: unable to open root directory\n");
       return(-1);
    }
-	printf("Open root dir done\n");
+	dprintf("Open root dir done\n");
    if (!(fs->fbb = vmfs_bitmap_open_at(root_dir,VMFS_FBB_FILENAME))) {
       fprintf(stderr,"Unable to open file-block bitmap (FBB).\n");
       return(-1);
@@ -157,30 +159,19 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       return(-1);
 
 
-	printf("%s : open pb2\n", __FUNCTION__);
+	dprintf("open pb2\n");
    fs->pb2 = vmfs_open_meta_file(root_dir, VMFS_PB2_FILENAME,
-                                 VMFS_BLK_PB_MAX_ITEM, VMFS_BLK_PB_MAX_ENTRY,
+                                 VMFS_BLK_PB2_MAX_ITEM, VMFS_BLK_PB2_MAX_ENTRY,
                                  "pointer 2nd block bitmap (PB2)");
    if (!fs->pb2)
       return(-1);
 
-	printf("%s : open sbc\n", __FUNCTION__);
+	dprintf("open sbc\n");
    fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
                                  VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
                                  "pointer super bitmap (SBC)");
    if (!fs->sbc)
       return(-1);
-	if (fs->sbc->bmh.hdr_size==0)
-	{
-		printf("Force to fill sbc bmh\n");
-		fs->sbc->bmh.items_per_bitmap_entry = 0x100;
-		fs->sbc->bmh.bmp_entries_per_area = 8;
-		fs->sbc->bmh.hdr_size = 0x10000;
-		fs->sbc->bmh.data_size = 0x10000;
-		fs->sbc->bmh.area_size = 0x8010000;
-		fs->sbc->bmh.total_items = 0x4000;
-		fs->sbc->bmh.area_count = 8;
-	}
    vmfs_bitmap_close(fdc);
    vmfs_dir_close(root_dir);
    return(0);
@@ -198,7 +189,7 @@ static int vmfs_read_fdc_base(vmfs_fs_t *fs)
     * When blocksize = 8 Mb, there is free space between heartbeats
     * and FDC.
     */
-   printf("VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE = %d blocksize %lu\n", 
+   dprintf("VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE = %d blocksize %lu\n", 
    	VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE, vmfs_fs_get_blocksize(fs));
    fdc_base = m_max(1, (VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE) /
                     vmfs_fs_get_blocksize(fs));
@@ -215,7 +206,7 @@ static int vmfs_read_fdc_base(vmfs_fs_t *fs)
    inode.zla = VMFS_BLK_TYPE_FB;
    inode.blocks[0] = VMFS_BLK_FB_BUILD(fdc_base, 0);
    inode.ref_count = 1;
-   printf("fdc_base %lu blocks0 %lx (%lx %lx shift %d)\n", fdc_base, inode.blocks[0], 
+   dprintf("fdc_base %lu blocks0 %lx (%lx %lx shift %d)\n", fdc_base, inode.blocks[0], 
    	VMFS_BLK_VALUE(fdc_base, VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
    	VMFS_BLK_FILL(VMFS_BLK_VALUE(fdc_base, VMFS_BLK_FB_ITEM_VALUE_LSB_MASK), VMFS_BLK_FB_ITEM_LSB_MASK),
    	VMFS_BLK_SHIFT(VMFS_BLK_FB_ITEM_LSB_MASK));

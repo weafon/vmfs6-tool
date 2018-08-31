@@ -20,11 +20,8 @@
 
 #include <stddef.h>
 #include <sys/stat.h>
-#if WF_VMFS6 == 1
+
 #define VMFS_INODE_SIZE  0x2000 // weafonvmfs6 0x800
-#else
-#define VMFS_INODE_SIZE  0x800
-#endif
 
 #define VMFS_INODE_BLK_COUNT      0x100
 

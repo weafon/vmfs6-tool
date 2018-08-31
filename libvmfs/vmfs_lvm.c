@@ -37,7 +37,7 @@ static vmfs_volume_t *vmfs_lvm_get_extent_from_offset(const vmfs_lvm_t *lvm,
       if ((segment >= lvm->extents[extent]->vol_info.first_segment) &&
           (segment <= lvm->extents[extent]->vol_info.last_segment))
       {
-      	printf("Got extents %d (%u %u %u) for segment %ld\n", extent, 
+      	dprintf("Got extents %d (%u %u %u) for segment %ld\n", extent, 
       		lvm->extents[extent]->vol_info.first_segment, lvm->extents[extent]->vol_info.last_segment,
       		lvm->extents[extent]->vol_info.num_segments, segment);
         return(lvm->extents[extent]);
@@ -70,7 +70,7 @@ static inline ssize_t vmfs_lvm_io(const vmfs_lvm_t *lvm,off_t pos,u_char *buf,
       fprintf(stderr,"VMFS: i/o spanned pos %ld len %ld over several extents is unsupported %ld\n", pos, len, vmfs_lvm_extent_size(extent));
       return(-1);
    }
-	printf("%s : pos 0x%lx len %ld\n", __FUNCTION__, pos, len);
+	dprintf("%s : pos 0x%lx len %ld\n", __FUNCTION__, pos, len);
    return(func(&extent->dev,pos,buf,len));
 }
 

@@ -53,7 +53,6 @@ const vmfs_dirent_t *vmfs_dir_lookup(vmfs_dir_t *d,const char *name)
    vmfs_dir_seek(d,0);
 
    while((rec = vmfs_dir_read(d))) {
-//   		printf("%s : cmp rec %s to %s\n", __FUNCTION__, rec->name, name);
       if (!strcmp(rec->name,name))
          return(rec);
    }
@@ -99,7 +98,7 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
    int close_dir = 0;
    const vmfs_fs_t *fs = vmfs_dir_get_fs(base_dir);
    uint32_t ret = 0;
-   printf("%s : look for file %s\n", __FUNCTION__, path);
+   dprintf("look for file %s\n",  path);
 
    cur_dir = base_dir;
 
@@ -116,7 +115,7 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
    ret = rec->block_id;
 
    nam = ptr = strdup(path);
-	printf("%s : start to search %s\n", __FUNCTION__, path);
+	dprintf("start to search %s\n", path);
    while(*ptr != 0) {
       sl = strchr(ptr,'/');
 
@@ -187,7 +186,7 @@ static int vmfs_dir_cache_entries(vmfs_dir_t *d)
       free(d->buf);
 
    dir_size = vmfs_file_get_size(d->dir);
-   printf("%s : dir size %ld\n", __FUNCTION__, dir_size);
+   dprintf("dir size %ld\n", dir_size);
 
    if (!(d->buf = calloc(1,dir_size)))
       return(-1);
@@ -195,7 +194,7 @@ static int vmfs_dir_cache_entries(vmfs_dir_t *d)
       free(d->buf);
       return(-1);
    }
-	hexdump(d->buf, dir_size);
+//	hexdump(d->buf, dir_size);
    return(0);
 }
 
@@ -206,7 +205,7 @@ static vmfs_dir_t *vmfs_dir_open_from_file(vmfs_file_t *file)
 
    if (file == NULL)
    {
-   		printf("Fail to get meaningful file pointer\n");
+   		dprintf("Fail to get meaningful file pointer\n");
       return NULL;
      }
 
@@ -218,33 +217,28 @@ static vmfs_dir_t *vmfs_dir_open_from_file(vmfs_file_t *file)
 
    d->dir = file;
    vmfs_dir_cache_entries(d);
-   printf("%s : end\n", __FUNCTION__);
+   dprintf("%s : end\n", __FUNCTION__);
    return d;
 }
 
 /* Open a directory based on an inode buffer */
 vmfs_dir_t *vmfs_dir_open_from_inode(const vmfs_inode_t *inode)
 {
-	vmfs_dir_t* pret = vmfs_dir_open_from_file(vmfs_file_open_from_inode(inode));
-	printf("%s : end\n", __FUNCTION__);
-	return pret;
+   return vmfs_dir_open_from_file(vmfs_file_open_from_inode(inode));
+
 }
 
 /* Open a directory based on a directory entry */
 vmfs_dir_t *vmfs_dir_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 {
-   vmfs_dir_t* pret =  vmfs_dir_open_from_file(vmfs_file_open_from_blkid(fs,blk_id));
-   printf("%s : end\n", __FUNCTION__);
-   return pret;
+   return vmfs_dir_open_from_file(vmfs_file_open_from_blkid(fs,blk_id));
    
 }
 
 /* Open a directory */
 vmfs_dir_t *vmfs_dir_open_at(vmfs_dir_t *d,const char *path)
 {
-   vmfs_dir_t* pret = vmfs_dir_open_from_file(vmfs_file_open_at(d,path));
-   printf("%s : end\n", __FUNCTION__);
-   return pret;
+   return vmfs_dir_open_from_file(vmfs_file_open_at(d,path));
    
 }
 
@@ -255,24 +249,22 @@ const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 {
    u_char *buf;
 	uint32_t off=0;   
-//	printf("%s called\n", __FUNCTION__);
    if (d == NULL)
       return(NULL);
-#if WF_VMFS6 == 1      
+// weafon: very wired offset, should take time to figure out why 11040
    if (d->pos<2)
 	   off=0x3b8;
    else
 	   off=0x11040 - 2*VMFS_DIRENT_SIZE;
-#endif
 	do {
-	   printf("%s : call for off %u d->pos %d\n", __FUNCTION__, off, d->pos);	
+	   dprintf("called for off %u d->pos %d\n", off, d->pos);	
 	   if (d->buf) {
 	      if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
 	         return(NULL);
 	      buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
 	   } else {
 	      u_char _buf[VMFS_DIRENT_SIZE];
-	      printf("%s : call for file_pread off %u d->pos %d\n", __FUNCTION__, off, d->pos);
+	      dprintf("%s : call for file_pread off %u d->pos %d\n", __FUNCTION__, off, d->pos);
 	      if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
 	                           off+d->pos*sizeof(_buf)) != sizeof(_buf)))
 	         return(NULL);

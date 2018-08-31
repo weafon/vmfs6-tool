@@ -36,7 +36,7 @@ static ssize_t vmfs_vol_read(const vmfs_device_t *dev,off_t pos,
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
    pos += vol->vmfs_base + 0x1000000; 
-	printf("abs read loc 0x%lx len %ld\n", pos, len);
+	dprintf("abs read loc 0x%lx len %ld\n", pos, len);
    return(m_pread(vol->fd,buf,len,pos));
 }
 
@@ -92,13 +92,7 @@ static int vmfs_vol_check_reservation(vmfs_volume_t *vol)
 /* Read volume information */
 static int vmfs_volinfo_read(vmfs_volume_t *volume)
 {
-#if WF_VMFS6 == 1
    DECL_ALIGNED_BUFFER(buf,8192); 
-#else
-   DECL_ALIGNED_BUFFER(buf,1024); 
-#endif   
-
-
    vmfs_volinfo_t *vol = &volume->vol_info;
 
    if (m_pread(volume->fd,buf,buf_len,volume->vmfs_base) != buf_len)
@@ -221,11 +215,11 @@ vmfs_volume_t *vmfs_vol_open(const char *filename,vmfs_flags_t flags)
    if (vmfs_volinfo_read(vol) == -1)
       goto err_open;
 
-   /* We support only VMFS3 and VMFS5*/
-//   if ((vol->vol_info.version != 3) && (vol->vol_info.version != 5)) {
- //     fprintf(stderr,"VMFS: Unsupported version %u\n",vol->vol_info.version);
-  //    goto err_open;
- // }
+   /* We support only VMFS3 and VMFS5 and limited VMFS6*/
+   if ((vol->vol_info.version != 3) && (vol->vol_info.version != 5) && (vol->vol_info.version != 6)) {
+      fprintf(stderr,"VMFS: Unsupported version %u\n",vol->vol_info.version);
+      goto err_open;
+  }
 
    if ((vol->vol_info.version == 5) && flags.read_write) {
       fprintf(stderr, "VMFS: Can't open VMFS read/write\n");

@@ -26,8 +26,6 @@
 #include <assert.h>
 #include "vmfs.h"
 
-
-
 static inline uint64_t vmfs_inode_read_blk_id(const u_char *buf,u_int index)
 {
    return(read_le64(buf,VMFS_INODE_OFS_BLK_ARRAY+(index*sizeof(uint64_t))));
@@ -44,7 +42,7 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 {
    int i;
    vmfs_metadata_hdr_read(&inode->mdh,buf);
-   printf("%s called buf %p magic %x\n", __FUNCTION__, buf, inode->mdh.magic);      
+   dprintf("called buf %p magic %x\n", buf, inode->mdh.magic);      
 
 
    if (inode->mdh.magic != VMFS_INODE_MAGIC)
@@ -52,7 +50,6 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    inode->id        = read_le32(buf,VMFS_INODE_OFS_ID);
    inode->id2       = read_le32(buf,VMFS_INODE_OFS_ID2);
-   printf("metadata done for inode id 0x%x\n", inode->id);      
    inode->nlink     = read_le32(buf,VMFS_INODE_OFS_NLINK);
    inode->type      = read_le32(buf,VMFS_INODE_OFS_TYPE);
    inode->flags     = read_le32(buf,VMFS_INODE_OFS_FLAGS);
@@ -71,24 +68,24 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    /* "corrected" mode */
    inode->cmode    = inode->mode | vmfs_file_type2mode(inode->type);
-   printf("metadata done for inode type %d zla 0x%x\n", inode->type, inode->zla);   
+   dprintf("metadata done for inode type %d zla 0x%x\n", inode->type, inode->zla);   
 
    if (inode->type == VMFS_FILE_TYPE_RDM) {
       inode->rdm_id = read_le32(buf,VMFS_INODE_OFS_RDM_ID);
    } else if (inode->zla == VMFS5_ZLA_BASE + VMFS_BLK_TYPE_FD) {
       memcpy(inode->content, buf + VMFS_INODE_OFS_CONTENT, inode->size);
    } else {
-      printf("file id %d off %ld blk:\n", inode->id, VMFS_INODE_OFS_BLK_ARRAY);
-      hexdump(buf+VMFS_INODE_OFS_BLK_ARRAY,256);
+      dprintf("file id %d off %ld blk:\n", inode->id, VMFS_INODE_OFS_BLK_ARRAY);
+      //hexdump(buf+VMFS_INODE_OFS_BLK_ARRAY,256);
       for(i=0;i<VMFS_INODE_BLK_COUNT;i++)
       {
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
          if (inode->blocks[i] == 0)	      
          	break;
-		 printf("%d:%016lx\n", i, inode->blocks[i]);				
+		 dprintf("%d:%016lx\n", i, inode->blocks[i]);				
          	
        }
-       printf("-------\n");
+       dprintf("-------\n");
    }
 
    return(0);
@@ -151,7 +148,7 @@ int vmfs_inode_update(const vmfs_inode_t *inode,int update_blk_list)
 int vmfs_inode_get(const vmfs_fs_t *fs,uint64_t blk_id,vmfs_inode_t *inode)
 {
    DECL_ALIGNED_BUFFER_WOL(buf,VMFS_INODE_SIZE);
-	printf("%s : called\n", __FUNCTION__);
+	dprintf("%s : called\n", __FUNCTION__);
    if (VMFS_BLK_TYPE(blk_id) != VMFS_BLK_TYPE_FD)
       return(-1);
 
@@ -314,7 +311,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
       zla -= VMFS5_ZLA_BASE;
    } else
       vmfs5_extension = 0;
-	printf("%s : call for type-zla %d pos %016lx\n", __FUNCTION__, zla, pos);
+	dprintf("%s : call for type-zla %d pos %016lx\n", __FUNCTION__, zla, pos);
    switch(zla) {
       case VMFS_BLK_TYPE_FB:
       case VMFS_BLK_TYPE_SB:
@@ -327,11 +324,11 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
 
          *blk_id = inode->blocks[blk_index];
          break;
-#if WF_VMFS6==1   
+  
 	  case VMFS_BLK_TYPE_PB2:
 	  {
 		  DECL_ALIGNED_BUFFER_WOL(buf,fs->pb2->bmh.data_size);
-		  uint32_t pb_blk_id;
+		  uint64_t pb_blk_id;
 		  uint32_t blk_per_pb;
 		  u_int pb_index;
 		  u_int sub_index;
@@ -349,7 +346,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
 		  
 		  if (!pb_blk_id)
 			 break;
-
+			dprintf("get item for pb2 blk 0x%lx\n", pb_blk_id);
 		  if (!vmfs_bitmap_get_item(fs->pb2,
 									VMFS_BLK_PB2_ENTRY(pb_blk_id),
 									VMFS_BLK_PB2_ITEM(pb_blk_id),
@@ -360,7 +357,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
 		  break;
 
 	  }
-#endif  
+
 
       case VMFS_BLK_TYPE_PB:
       {
@@ -383,7 +380,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
 
          if (!pb_blk_id)
             break;
-
+// under vmfs6 authors seems use sbc to replace pbc file for the index of a pb file
          if (!vmfs_bitmap_get_item(fs->sbc,
                                    VMFS_BLK_SB_ENTRY(pb_blk_id),
                                    VMFS_BLK_SB_ITEM(pb_blk_id),
@@ -391,7 +388,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
             return(-EIO);
 //		hexdump(buf, fs->pbc->bmh.data_size);
          *blk_id = read_le64(buf,sub_index*sizeof(uint64_t));
-		printf("PB pb idx %u sub idx %u get blk_id 0x%lx\n", pb_index, sub_index, *blk_id);         
+		dprintf("PB pb idx %u sub idx %u get blk_id 0x%lx\n", pb_index, sub_index, *blk_id);         
          break;
       }
 
@@ -402,7 +399,6 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
          }
       default:
          /* Unexpected ZLA type */
-        	printf("Unexpected ZLA\n");
          return(-EIO);
    }
 

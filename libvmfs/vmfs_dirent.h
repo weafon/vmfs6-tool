@@ -21,15 +21,7 @@
 #include <stddef.h>
 #include "vmfs_file.h"
 
-
-#if WF_VMFS6 == 1
-#define VMFS_DIRENT_SIZE (0x120)
-#else
-#define VMFS_DIRENT_SIZE (0x8c)
-#endif
-
-
-#if WF_VMFS6 == 1
+#define VMFS_DIRENT_SIZE (0x120) // vmfs5 0x8c
 struct vmfs_dirent_raw {
    uint32_t type;
    uint32_t block_id;
@@ -39,14 +31,6 @@ struct vmfs_dirent_raw {
    char name[128];
 } __attribute__((packed));
 
-#else
-struct vmfs_dirent_raw {
-   uint32_t type;
-   uint32_t block_id;
-   uint32_t record_id;
-   char name[128];
-} __attribute__((packed));
-#endif
 #define VMFS_DIRENT_OFS_TYPE    offsetof(struct vmfs_dirent_raw, type)
 #define VMFS_DIRENT_OFS_BLK_ID  offsetof(struct vmfs_dirent_raw, block_id)
 #define VMFS_DIRENT_OFS_REC_ID  offsetof(struct vmfs_dirent_raw, record_id)
