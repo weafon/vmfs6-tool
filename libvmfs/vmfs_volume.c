@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2011 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +37,7 @@ static ssize_t vmfs_vol_read(const vmfs_device_t *dev,off_t pos,
 {
    vmfs_volume_t *vol = (vmfs_volume_t *) dev;
    pos += vol->vmfs_base + 0x1000000; 
-	dprintf("abs read loc 0x%lx len %ld\n", pos, len);
+   dprintf("abs read loc 0x%lx len %ld\n", pos, len);
    return(m_pread(vol->fd,buf,len,pos));
 }
 
@@ -215,13 +216,13 @@ vmfs_volume_t *vmfs_vol_open(const char *filename,vmfs_flags_t flags)
    if (vmfs_volinfo_read(vol) == -1)
       goto err_open;
 
-   /* We support only VMFS3 and VMFS5 and limited VMFS6*/
-   if ((vol->vol_info.version != 3) && (vol->vol_info.version != 5) && (vol->vol_info.version != 6)) {
+   /* We support only limited VMFS6 for now*/
+   if (vol->vol_info.version != 6) {
       fprintf(stderr,"VMFS: Unsupported version %u\n",vol->vol_info.version);
       goto err_open;
-  }
+   }
 
-   if ((vol->vol_info.version == 5) && flags.read_write) {
+   if ((vol->vol_info.version >= 5) && flags.read_write) {
       fprintf(stderr, "VMFS: Can't open VMFS read/write\n");
       goto err_open;
    }

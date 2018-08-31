@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2011 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +71,7 @@ static inline ssize_t vmfs_lvm_io(const vmfs_lvm_t *lvm,off_t pos,u_char *buf,
       fprintf(stderr,"VMFS: i/o spanned pos %ld len %ld over several extents is unsupported %ld\n", pos, len, vmfs_lvm_extent_size(extent));
       return(-1);
    }
-	dprintf("%s : pos 0x%lx len %ld\n", __FUNCTION__, pos, len);
+   dprintf("%s : pos 0x%lx len %ld\n", __FUNCTION__, pos, len);
    return(func(&extent->dev,pos,buf,len));
 }
 

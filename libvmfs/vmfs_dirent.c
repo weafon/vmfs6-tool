@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2012 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +116,7 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
    ret = rec->block_id;
 
    nam = ptr = strdup(path);
-	dprintf("start to search %s\n", path);
+   dprintf("start to search %s\n", path);
    while(*ptr != 0) {
       sl = strchr(ptr,'/');
 
@@ -205,9 +206,9 @@ static vmfs_dir_t *vmfs_dir_open_from_file(vmfs_file_t *file)
 
    if (file == NULL)
    {
-   		dprintf("Fail to get meaningful file pointer\n");
+      dprintf("Fail to get meaningful file pointer\n");
       return NULL;
-     }
+   }
 
    if (!(d = calloc(1, sizeof(*d))) ||
        (file->inode->type != VMFS_FILE_TYPE_DIR)) {
@@ -248,30 +249,30 @@ by subsequent calls */
 const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 {
    u_char *buf;
-	uint32_t off=0;   
+   uint32_t off=0;   
    if (d == NULL)
       return(NULL);
 // weafon: very wired offset, should take time to figure out why 11040
    if (d->pos<2)
-	   off=0x3b8;
+      off=0x3b8;
    else
-	   off=0x11040 - 2*VMFS_DIRENT_SIZE;
-	do {
-	   dprintf("called for off %u d->pos %d\n", off, d->pos);	
-	   if (d->buf) {
-	      if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
+      off=0x11040 - 2*VMFS_DIRENT_SIZE;
+   do {
+      dprintf("called for off %u d->pos %d\n", off, d->pos);	
+      if (d->buf) {
+	     if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
 	         return(NULL);
-	      buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
-	   } else {
-	      u_char _buf[VMFS_DIRENT_SIZE];
-	      dprintf("%s : call for file_pread off %u d->pos %d\n", __FUNCTION__, off, d->pos);
-	      if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
+         buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
+      } else {
+         u_char _buf[VMFS_DIRENT_SIZE];
+	     dprintf("%s : call for file_pread off %u d->pos %d\n", __FUNCTION__, off, d->pos);
+	     if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
 	                           off+d->pos*sizeof(_buf)) != sizeof(_buf)))
-	         return(NULL);
-	      buf = _buf;
-	   }
-	   vmfs_dirent_read(&d->dirent,buf);
-		d->pos++;
+	        return(NULL);
+	     buf = _buf;
+      }
+	  vmfs_dirent_read(&d->dirent,buf);
+      d->pos++;
    }while(d->dirent.block_id == 0);
    return &d->dirent;
 }

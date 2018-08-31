@@ -2,7 +2,8 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2011,2012 Mike Hommey <mh@glandium.org>
- *
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
+  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -59,7 +60,7 @@ vmfs_file_t *vmfs_file_open_from_inode(const vmfs_inode_t *inode)
 vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 {
    vmfs_inode_t *inode;
-	dprintf("%s: blk_id 0x%lx\n", __FUNCTION__, blk_id);
+   dprintf("%s: blk_id 0x%lx\n", __FUNCTION__, blk_id);
    if (!(inode = vmfs_inode_acquire(fs,blk_id)))
       return NULL;
 
@@ -70,7 +71,7 @@ vmfs_file_t *vmfs_file_open_from_blkid(const vmfs_fs_t *fs,uint64_t blk_id)
 vmfs_file_t *vmfs_file_open_at(vmfs_dir_t *dir,const char *path)
 {
    uint64_t blk_id;
-	dprintf("%s : search and open %s for read\n", __FUNCTION__, path);
+   dprintf("%s : search and open %s for read\n", __FUNCTION__, path);
    if (!(blk_id = vmfs_dir_resolve_path(dir,path,1)))
       return(NULL);
 
@@ -160,29 +161,29 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
    if (f->flags & VMFS_FILE_FLAG_FD)
    {
-   	dprintf("file read?\n");
+      dprintf("file read?\n");
       return pread(f->fd, buf, len, pos);
-     }
+   }
 
    /* We don't handle RDM files */
    if (f->inode->type == VMFS_FILE_TYPE_RDM)
    {
-   		dprintf("not handle RDM files\n");
+      dprintf("not handle RDM files\n");
       return(-EIO);
-     }
+   }
 
    blk_size = vmfs_fs_get_blocksize(fs);
    file_size = vmfs_file_get_size(f);
-	dprintf("%s call with blk size %lu file size %lu\n", __FUNCTION__, blk_size, file_size);
+   dprintf("%s call with blk size %lu file size %lu\n", __FUNCTION__, blk_size, file_size);
    while(len > 0) {
       if (pos >= file_size)
          break;
 
       if ((err = vmfs_inode_get_block(f->inode,pos,&blk_id)) < 0)
       {
-      	dprintf("%s : fail to get block 0x%lx\n", __FUNCTION__, blk_id);
+         dprintf("%s : fail to get block 0x%lx\n", __FUNCTION__, blk_id);
          return(err);
-        }
+      }
 
 #if 0
       if (f->vol->debug_level > 1)
@@ -191,7 +192,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
       blk_type = VMFS_BLK_FB_TBZ(blk_id) ?
                     VMFS_BLK_TYPE_NONE : VMFS_BLK_TYPE(blk_id);
-	  dprintf("%s : call for pos %ld , got blk_id %lu (0x%lx) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
+      dprintf("%s : call for pos %ld , got blk_id %lu (0x%lx) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
 
       switch(blk_type) {
          /* Unallocated block */
@@ -205,7 +206,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
          /* File-Block */
          case VMFS_BLK_TYPE_FB:
-		case VMFS_BLK_TYPE_PB2:
+	     case VMFS_BLK_TYPE_PB2:
             exp_len = m_min(len,file_size - pos);
             res = vmfs_block_read_fb(fs,blk_id,pos,buf,exp_len);
 
@@ -231,7 +232,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
             fprintf(stderr,"VMFS: unknown block type 0x%2.2x\n",blk_type);
             return(-EIO);
       }
-		dprintf("%s : call end with res %ld for type %d\n", __FUNCTION__, res, blk_type);
+      dprintf("%s : call end with res %ld for type %d\n", __FUNCTION__, res, blk_type);
       /* Error while reading block, abort immediately */
       if (res < 0)
          return(res);
@@ -382,7 +383,7 @@ int vmfs_file_lstat_at(vmfs_dir_t *dir,const char *path,struct stat *buf)
    const vmfs_dirent_t *entry;
    vmfs_dir_t *d;
    char *name;
-	dprintf("%s called for path %s\n", __FUNCTION__, path);
+   dprintf("%s called for path %s\n", __FUNCTION__, path);
    name = m_dirname(path);
    d = vmfs_dir_open_at(dir,name);
    free(name);

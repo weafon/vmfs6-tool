@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2012 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,7 +137,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       fprintf(stderr,"VMFS: unable to open root directory\n");
       return(-1);
    }
-	dprintf("Open root dir done\n");
+   dprintf("Open root dir done\n");
    if (!(fs->fbb = vmfs_bitmap_open_at(root_dir,VMFS_FBB_FILENAME))) {
       fprintf(stderr,"Unable to open file-block bitmap (FBB).\n");
       return(-1);
@@ -159,14 +160,14 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       return(-1);
 
 
-	dprintf("open pb2\n");
+   dprintf("open pb2\n");
    fs->pb2 = vmfs_open_meta_file(root_dir, VMFS_PB2_FILENAME,
                                  VMFS_BLK_PB2_MAX_ITEM, VMFS_BLK_PB2_MAX_ENTRY,
                                  "pointer 2nd block bitmap (PB2)");
    if (!fs->pb2)
       return(-1);
 
-	dprintf("open sbc\n");
+   dprintf("open sbc\n");
    fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
                                  VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
                                  "pointer super bitmap (SBC)");
@@ -190,7 +191,7 @@ static int vmfs_read_fdc_base(vmfs_fs_t *fs)
     * and FDC.
     */
    dprintf("VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE = %d blocksize %lu\n", 
-   	VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE, vmfs_fs_get_blocksize(fs));
+      VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE, vmfs_fs_get_blocksize(fs));
    fdc_base = m_max(1, (VMFS_HB_BASE + VMFS_HB_NUM * VMFS_HB_SIZE) /
                     vmfs_fs_get_blocksize(fs));
 

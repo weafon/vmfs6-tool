@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2011 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,7 +149,7 @@ int vmfs_inode_update(const vmfs_inode_t *inode,int update_blk_list)
 int vmfs_inode_get(const vmfs_fs_t *fs,uint64_t blk_id,vmfs_inode_t *inode)
 {
    DECL_ALIGNED_BUFFER_WOL(buf,VMFS_INODE_SIZE);
-	dprintf("%s : called\n", __FUNCTION__);
+   dprintf("%s : called\n", __FUNCTION__);
    if (VMFS_BLK_TYPE(blk_id) != VMFS_BLK_TYPE_FD)
       return(-1);
 

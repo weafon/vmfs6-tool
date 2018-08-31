@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -519,9 +520,9 @@ static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
 
    if (!f)
       return NULL;
-	dprintf("called to file_pread\n");
+   dprintf("called to file_pread\n");
    if (vmfs_file_pread(f,buf,buf_len,0) != buf_len) {
-   	dprintf("fail pread\n");
+      dprintf("fail pread\n");
       vmfs_file_close(f);
       return NULL;
    }
@@ -533,7 +534,7 @@ static inline vmfs_bitmap_t *vmfs_bitmap_open_from_file(vmfs_file_t *f)
    //hexdump(buf, buf_len);
    vmfs_bmh_read(&b->bmh, buf);
    b->f = f;
-	dprintf("leave\n");   
+   dprintf("leave\n");   
    return b;
 }
 

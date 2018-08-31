@@ -2,6 +2,7 @@
  * vmfs-tools - Tools to access VMFS filesystems
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2012 Mike Hommey <mh@glandium.org>
+ * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -259,7 +260,7 @@ ssize_t vmfs_block_read_sb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    clen   = m_min(fs->sbc->bmh.data_size - offset,len);
    sbc_entry = VMFS_BLK_SB_ENTRY(blk_id);
    sbc_item  = VMFS_BLK_SB_ITEM(blk_id);
-	dprintf("entry %lu %u item %lu %u (%lx %lx)\n", 
+   dprintf("entry %lu %u item %lu %u (%lx %lx)\n", 
 		VMFS_BLK_SB_ENTRY(blk_id), sbc_entry, VMFS_BLK_SB_ITEM(blk_id), sbc_item,
 		VMFS_BLK_VALUE(blk_id, VMFS_BLK_SB_ITEM_LSB_MASK),
 		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_SB_ITEM_LSB_MASK), VMFS_BLK_SB_ITEM_VALUE_LSB_MASK) );
@@ -324,17 +325,17 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
 
    fb_item = VMFS_BLK_FB_ITEM(blk_id);
 
-	dprintf("blk id %lx %lx %lx %lx\n", 
-		VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), 
-		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
-		VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), 
-		VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), VMFS_BLK_FB_ITEM_VALUE_MSB_MASK));
+   dprintf("blk id %lx %lx %lx %lx\n", 
+      VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), 
+	  VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
+	  VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), 
+      VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), VMFS_BLK_FB_ITEM_VALUE_MSB_MASK));
 
    /* If everything is aligned for direct I/O, store directly in user buffer */
    if ((n_offset == offset) && (n_clen == clen) &&
        ALIGN_CHECK((uintptr_t)buf,M_DIO_BLK_SIZE))
    {
-	dprintf("1: fb_item %d n_offset %lu sz %lu\n", fb_item, n_offset, n_clen);   
+      dprintf("1: fb_item %d n_offset %lu sz %lu\n", fb_item, n_offset, n_clen);   
       if (vmfs_fs_read(fs,fb_item,n_offset,buf,n_clen) != n_clen)
          return(-EIO);
 
@@ -344,7 +345,7 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    /* Allocate a temporary buffer and copy result to user buffer */
    if (!(tmpbuf = iobuffer_alloc(n_clen)))
       return(-1);
-	dprintf("2: fb_item %d n_offset %lu off %lu sz %lu (0x%lx) %lu\n", fb_item, n_offset, offset, n_clen, n_clen, clen);
+   dprintf("2: fb_item %d n_offset %lu off %lu sz %lu (0x%lx) %lu\n", fb_item, n_offset, offset, n_clen, n_clen, clen);
    if (vmfs_fs_read(fs,fb_item,n_offset,tmpbuf,n_clen) != n_clen) {
       iobuffer_free(tmpbuf);
       return(-EIO);
