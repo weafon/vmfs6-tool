@@ -180,7 +180,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 
       if ((err = vmfs_inode_get_block(f->inode,pos,&blk_id)) < 0)
       {
-      	printf("fail to get block 0x%lx\n", blk_id);
+      	printf("%s : fail to get block 0x%lx\n", blk_id);
          return(err);
         }
 
@@ -210,7 +210,7 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 #endif
             exp_len = m_min(len,file_size - pos);
             res = vmfs_block_read_fb(fs,blk_id,pos,buf,exp_len);
-//            hexdump(buf, exp_len);
+
             break;
 
          /* Sub-Block */
@@ -351,6 +351,7 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
       }
 */
 		hexdump(buf, res);
+		break;
       if (res < clen)
          break;
    }

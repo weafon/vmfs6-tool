@@ -164,7 +164,7 @@ bool vmfs_bitmap_get_item(vmfs_bitmap_t *b, uint32_t entry, uint32_t item,
 	bool ret;
 	uint32_t s;
    off_t pos = vmfs_bitmap_get_item_pos(b,entry,item);
-   printf("%s : called %u pos 0x%08lx\n", __FUNCTION__, b->bmh.data_size, pos);
+   printf("%s : called data_size 0x%x pos 0x%08lx\n", __FUNCTION__, b->bmh.data_size, pos);
    ret = ((s=vmfs_file_pread(b->f,buf,b->bmh.data_size,pos)) == b->bmh.data_size);
    printf("%s : %u leave\n", __FUNCTION__, s);   
    return ret;

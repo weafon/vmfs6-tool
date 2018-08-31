@@ -29,15 +29,6 @@
 #define VMFS_INODE_BLK_COUNT      0x100
 
 #define VMFS_INODE_MAGIC  0x10c00001
-struct sblkloc
-{
-	uint32_t type:3;
-	uint32_t flag:5;
-	uint32_t unknown0:24;
-	uint16_t unknown1;
-	uint16_t unknown2:3;
-	uint16_t blocks:13;	
-} __attribute__((packed));
 struct vmfs_inode_raw {
    struct vmfs_metadata_hdr_raw mdh;
    uint32_t id;
@@ -58,17 +49,14 @@ struct vmfs_inode_raw {
    uint32_t tbz; 
    uint32_t cow; 
    u_char _unknown2[432];
-#if WF_VMFS6 == 1      
-   u_char _unknown3[0x400];
-#endif   
+
    union {
-#if WF_VMFS6 == 1   
-      struct sblkloc blocks[VMFS_INODE_BLK_COUNT];
-#else      
-      uint32_t blocks[VMFS_INODE_BLK_COUNT];      
-#endif      
+   	struct {
+   	   u_char _unknown3[0x400];
+      uint64_t blocks[VMFS_INODE_BLK_COUNT];      
+     };
       uint32_t rdm_id;
-      char content[VMFS_INODE_BLK_COUNT * sizeof(uint32_t)];
+      char content[(VMFS_INODE_BLK_COUNT * sizeof(uint64_t))+0x400];
    };
 } __attribute__((packed));
 
@@ -100,7 +88,7 @@ struct vmfs_inode_raw {
 #define VMFS_INODE_SYNC_ALL   (VMFS_INODE_SYNC_META | VMFS_INODE_SYNC_BLK)
 
 /* Some VMFS 5 features use a weird ZLA */
-#define VMFS5_ZLA_BASE 4301
+#define VMFS5_ZLA_BASE 4301 //0x10d1
 
 struct vmfs_inode {
    vmfs_metadata_hdr_t mdh;
@@ -118,7 +106,7 @@ struct vmfs_inode {
    uint32_t rdm_id;
    union {
      uint64_t blocks[VMFS_INODE_BLK_COUNT];
-     char content[VMFS_INODE_BLK_COUNT * sizeof(uint64_t)];
+     char content[VMFS_INODE_BLK_COUNT * sizeof(uint64_t)+0x400];
    };
 
    /* In-core inode information */

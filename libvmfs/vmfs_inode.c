@@ -71,7 +71,7 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
 
    /* "corrected" mode */
    inode->cmode    = inode->mode | vmfs_file_type2mode(inode->type);
-   printf("metadata done for inode type %d\n", inode->type);   
+   printf("metadata done for inode type %d zla 0x%x\n", inode->type, inode->zla);   
 
    if (inode->type == VMFS_FILE_TYPE_RDM) {
       inode->rdm_id = read_le32(buf,VMFS_INODE_OFS_RDM_ID);
@@ -384,9 +384,9 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
          if (!pb_blk_id)
             break;
 
-         if (!vmfs_bitmap_get_item(fs->pbc,
-                                   VMFS_BLK_PB_ENTRY(pb_blk_id),
-                                   VMFS_BLK_PB_ITEM(pb_blk_id),
+         if (!vmfs_bitmap_get_item(fs->sbc,
+                                   VMFS_BLK_SB_ENTRY(pb_blk_id),
+                                   VMFS_BLK_SB_ITEM(pb_blk_id),
                                    buf))
             return(-EIO);
 
