@@ -49,6 +49,31 @@ vmfs_## foo ##_t *vmfs_## foo ##_open_from_filespec( \
 vmfs_foo_open_from_filespec(file)
 vmfs_foo_open_from_filespec(dir)
 
+/* "hexdump" command */
+static int cmd_hexdump(vmfs_dir_t *base_dir,int argc,char *argv[])
+{
+   vmfs_file_t *f;
+   int i;
+
+   if (argc == 0) {
+      fprintf(stderr,"Usage: cat file1 ... fileN\n");
+      return(-1);
+   }
+
+   for(i=0;i<argc;i++) {
+      if (!(f = vmfs_file_open_from_filespec(base_dir, argv[i]))) {
+         fprintf(stderr,"Unable to open file %s\n",argv[i]);
+         return(-1);
+      }
+
+      vmfs_file_dump(f,0,0,stdout, true);
+      vmfs_file_close(f);
+   }
+
+   return(0);
+}
+
+
 /* "cat" command */
 static int cmd_cat(vmfs_dir_t *base_dir,int argc,char *argv[])
 {
@@ -66,7 +91,7 @@ static int cmd_cat(vmfs_dir_t *base_dir,int argc,char *argv[])
          return(-1);
       }
 
-      vmfs_file_dump(f,0,0,stdout);
+      vmfs_file_dump(f,0,0,stdout, false);
       vmfs_file_close(f);
    }
 
@@ -498,6 +523,7 @@ static int cmd_shell(vmfs_dir_t *base_dir,int argc,char *argv[]);
 
 struct cmd cmd_array[] = {
    { "cat", "Concatenate files and print on standard output", cmd_cat },
+   { "hexdump", "Hexdump files and print on standard output", cmd_hexdump },
    { "ls", "List files in specified directory", cmd_ls },
    { "truncate", "Truncate file", cmd_truncate },
    { "copy_file", "Copy a file to VMFS volume", cmd_copy_file },

@@ -170,7 +170,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
    dprintf("open sbc\n");
    fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
                                  VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
-                                 "pointer super bitmap (SBC)");
+                                 "pointer sub bitmap (SBC)");
    if (!fs->sbc)
       return(-1);
    vmfs_bitmap_close(fdc);

@@ -247,6 +247,7 @@ void hexdump(const unsigned char* data, int len)
 {
 	int i,j,k,e;
 	int fg=0;
+	char tmp;	
 	printf("-------------------------\n");
 	printf("HEX DUMP OF mem %p len %d\n", data, len);
 	printf("-------------------------\n");
@@ -276,6 +277,11 @@ void hexdump(const unsigned char* data, int len)
 		{
 			printf("zz\n");
 			fg=1;
+		}
+		if (i%40==39)
+		{
+			printf("hit any ket to continue.\n");
+			scanf("%c", tmp);
 		}
 	}
 }

@@ -318,11 +318,12 @@ ssize_t vmfs_file_pwrite(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
 }
 
 /* Dump a file */
-int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
+int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out, bool isHex)
 {
    u_char *buf;
    ssize_t res;
    size_t clen,buf_len;
+   
    if (f->flags & VMFS_FILE_FLAG_FD)
       return(-EIO);
 
@@ -342,13 +343,16 @@ int vmfs_file_dump(vmfs_file_t *f,off_t pos,uint64_t len,FILE *fd_out)
          fprintf(stderr,"vmfs_file_dump: problem reading input file.\n");
          return(-1);
       }
-
-      if (fwrite(buf,1,res,fd_out) != res) {
-         fprintf(stderr,"vmfs_file_dump: error writing output file.\n");
-         return(-1);
+      if (isHex)
+      {
+         hexdump(buf, res);
       }
-
-//	hexdump(buf, res);
+      else {
+         if (fwrite(buf,1,res,fd_out) != res) {
+            fprintf(stderr,"vmfs_file_dump: error writing output file.\n");
+            return(-1);
+         }
+      }
       if (res < clen)
          break;
    }
