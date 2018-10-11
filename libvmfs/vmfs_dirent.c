@@ -182,19 +182,23 @@ uint32_t vmfs_dir_resolve_path(vmfs_dir_t *base_dir,const char *path,
 static int vmfs_dir_cache_entries(vmfs_dir_t *d)
 {
    off_t dir_size;
-
+   int cn_page;
    if (d->buf != NULL)
       free(d->buf);
 
    dir_size = vmfs_file_get_size(d->dir);
+   cn_page = (dir_size+8191) / (4096*2); // get ceil number of pages;
    dprintf("dir size %ld\n", dir_size);
 
    if (!(d->buf = calloc(1,dir_size)))
+      return(-1);
+   if (!(d->ar_hb_exist = calloc(1, cn_page)))
       return(-1);
    if (vmfs_file_pread(d->dir,d->buf,dir_size,0) != dir_size) {
       free(d->buf);
       return(-1);
    }
+   memcpy(d->ar_hb_exist, d->buf+0x10040, cn_page);
 //	hexdump(d->buf, dir_size);
    return(0);
 }
@@ -248,30 +252,56 @@ vmfs_dir_t *vmfs_dir_open_at(vmfs_dir_t *d,const char *path)
 by subsequent calls */
 const vmfs_dirent_t *vmfs_dir_read(vmfs_dir_t *d)
 {
+   u_char hb;
    u_char *buf;
    uint32_t off=0;   
+   uint32_t cn_pages, off_in_page;
+   uint32_t cn_dirent_per_page = 4096 / VMFS_DIRENT_SIZE; // 0x1000/0x120 = 0x0e
    if (d == NULL)
       return(NULL);
 // weafon: very wired offset, should take time to figure out why 11040
-   if (d->pos<2)
-      off=0x3b8;
-   else
-      off=0x11040 - 2*VMFS_DIRENT_SIZE;
    do {
-      dprintf("called for off %u d->pos %d\n", off, d->pos);	
+	  if (d->pos<2)
+	  {
+		 off = 0x3b8 + (d->pos*VMFS_DIRENT_SIZE);
+		 cn_pages=0;
+	  }
+	  else
+	  {
+   //	   off=0x11040 + (0x40 * ((d->pos-2)/0x0e)) - 2*VMFS_DIRENT_SIZE;
+		  cn_pages = (d->pos-2)/cn_dirent_per_page;
+		  off_in_page = (d->pos-2) % cn_dirent_per_page;
+		  off = 0x11000 + cn_pages*0x1000 + 0x40 + (off_in_page*VMFS_DIRENT_SIZE);
+	  }  
+      if (d->ar_hb_exist)
+      {
+         dprintf("%u cn_pages %d ar_hb_exist[%d]:%d 0x%x , watch-hb 0x%x\n",
+         	d->pos, cn_pages, (cn_pages+1)/2,(cn_pages+1)%2, d->ar_hb_exist[(cn_pages+1)/2],
+         	(((d->ar_hb_exist[(cn_pages+1)/2] << (4*((cn_pages+1)%2))) & 0xf0)>>4));
+         hb = (((d->ar_hb_exist[(cn_pages+1)/2] << (4*((cn_pages+1)%2))) & 0xf0)>>4);
+         if ((hb&0x08)>0)
+         	return(NULL);
+         if ((hb&0x01)==0)
+         {
+         	dprintf("skip.\n");
+            d->dirent.block_id = 0;
+            goto l_next;
+         }
+      }
+      dprintf("called for off 0x%x d->pos %d 4KB-offset %d\n", off, d->pos, ((d->pos-2)/0x0e));	
       if (d->buf) {
-	     if ((off+d->pos*VMFS_DIRENT_SIZE)>= vmfs_file_get_size(d->dir))
+	     if (off>= vmfs_file_get_size(d->dir))
 	         return(NULL);
-         buf = &d->buf[d->pos*VMFS_DIRENT_SIZE+off];
+         buf = &d->buf[off];
       } else {
          u_char _buf[VMFS_DIRENT_SIZE];
 	     dprintf("%s : call for file_pread off %u d->pos %d\n", __FUNCTION__, off, d->pos);
-	     if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf),
-	                           off+d->pos*sizeof(_buf)) != sizeof(_buf)))
+	     if ((vmfs_file_pread(d->dir,_buf,sizeof(_buf), off) != sizeof(_buf)))
 	        return(NULL);
 	     buf = _buf;
       }
 	  vmfs_dirent_read(&d->dirent,buf);
+l_next:	  
       d->pos++;
    }while(d->dirent.block_id == 0);
    return &d->dirent;
@@ -285,7 +315,8 @@ int vmfs_dir_close(vmfs_dir_t *d)
 
    if (d->buf)
       free(d->buf);
-
+   if (d->ar_hb_exist)
+      free(d->ar_hb_exist);
    vmfs_file_close(d->dir);
    free(d);
    return(0);

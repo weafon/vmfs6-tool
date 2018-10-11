@@ -233,6 +233,7 @@ static void vmfs_fuse_opendir(fuse_req_t req, fuse_ino_t ino,
 static void vmfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                               off_t off, struct fuse_file_info *fi)
 {
+	FILE* fp;
    char buf[size];
    const vmfs_dirent_t *entry;
    struct stat st = {0, };
@@ -247,7 +248,9 @@ static void vmfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
       st.st_mode = vmfs_file_type2mode(entry->type);
       st.st_ino = blkid2ino(entry->block_id);
       sz = fuse_add_direntry(req, buf, size, entry->name, &st, off + 1);
-      
+//	  fp = fopen("/tmp/fusevmfs.log","a");	 
+//	  fprintf(fp, "0x%016x %s off %ld ret of fuse %d\n", entry->block_id, entry->name, off, sz);
+//	  fclose(fp);
       fuse_reply_buf(req, buf, sz);
    } else
       fuse_reply_buf(req, NULL, 0);

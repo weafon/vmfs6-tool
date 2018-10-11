@@ -51,6 +51,7 @@ struct vmfs_dir {
    uint32_t pos;
    vmfs_dirent_t dirent;
    u_char *buf;
+   u_char *ar_hb_exist;
 };
 
 static inline const vmfs_fs_t *vmfs_dir_get_fs(vmfs_dir_t *d)

@@ -281,7 +281,7 @@ void hexdump(const unsigned char* data, int len)
 		if (i%40==39)
 		{
 			printf("hit any ket to continue.\n");
-			scanf("%c", tmp);
+			scanf("%c", &tmp);
 		}
 	}
 }

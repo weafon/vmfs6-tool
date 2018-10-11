@@ -15,7 +15,7 @@ SUBDIRS := $(filter-out vmfs-fuse,$(SUBDIRS))
 endif
 endif
 
-ENV_CFLAGS := $(CFLAGS) -DVMFS6_DEBUG=0
+ENV_CFLAGS := $(CFLAGS) -DVMFS_DEBUG=0
 ENV_LDFLAGS := $(LDFLAGS)
 CFLAGS := 
 LDFLAGS :=
