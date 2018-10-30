@@ -363,7 +363,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
       case VMFS_BLK_TYPE_PB:
       {
          DECL_ALIGNED_BUFFER_WOL(buf,fs->pbc->bmh.data_size);
-         uint32_t pb_blk_id;
+         uint64_t pb_blk_id;
          uint32_t blk_per_pb;
          u_int pb_index;
          u_int sub_index;
