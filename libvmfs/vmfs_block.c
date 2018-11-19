@@ -411,3 +411,60 @@ ssize_t vmfs_block_write_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
    iobuffer_free(tmpbuf);
    return(-EIO);
 }
+
+/* Read a piece of a large file block */
+ssize_t vmfs_block_read_lfb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
+                           u_char *buf,size_t len)
+{
+   uint64_t offset,n_offset,large_blk_size;
+   size_t clen,n_clen;
+   uint32_t fb_item;
+   u_char *tmpbuf;
+
+   large_blk_size = LARGE_BLOCK_SIZE;
+
+   offset = pos % large_blk_size;
+   clen   = m_min(large_blk_size - offset,len);
+
+   /* Use "normalized" offset / length to access data (for direct I/O) */
+   n_offset = offset & ~(M_DIO_BLK_SIZE - 1);
+   n_clen   = ALIGN_NUM(clen + (offset - n_offset),M_DIO_BLK_SIZE);
+
+   /*
+     uint32_t zero_bit = VMFS_BLK_FB_ZERO(blk_id);
+     if (zero_bit) dprintf("The data is zero!\n");
+   */
+
+   fb_item = VMFS_BLK_FB_ITEM(blk_id);
+
+   dprintf("blk id %lx %lx %lx %lx\n", 
+      VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), 
+	  VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_LSB_MASK), VMFS_BLK_FB_ITEM_VALUE_LSB_MASK),
+	  VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), 
+      VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), VMFS_BLK_FB_ITEM_VALUE_MSB_MASK));
+
+   /* If everything is aligned for direct I/O, store directly in user buffer */
+   if ((n_offset == offset) && (n_clen == clen) &&
+       ALIGN_CHECK((uintptr_t)buf,M_DIO_BLK_SIZE))
+   {
+      dprintf("1: fb_item %d n_offset %lu sz %lu\n", fb_item, n_offset, n_clen);   
+      if (vmfs_fs_read(fs,fb_item,n_offset,buf,n_clen) != n_clen)
+         return(-EIO);
+
+      return(n_clen);
+   }
+
+   /* Allocate a temporary buffer and copy result to user buffer */
+   if (!(tmpbuf = iobuffer_alloc(n_clen)))
+      return(-1);
+   dprintf("2: fb_item %d n_offset %lu off %lu sz %lu (0x%lx) %lu\n", fb_item, n_offset, offset, n_clen, n_clen, clen);
+   if (vmfs_fs_read(fs,fb_item,n_offset,tmpbuf,n_clen) != n_clen) {
+      iobuffer_free(tmpbuf);
+      return(-EIO);
+   }
+
+   memcpy(buf,tmpbuf+(offset-n_offset),clen);
+
+   iobuffer_free(tmpbuf);
+   return(clen);
+}

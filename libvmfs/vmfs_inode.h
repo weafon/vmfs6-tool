@@ -24,7 +24,7 @@
 
 #define VMFS_INODE_SIZE  0x2000 // weafonvmfs6 0x800
 
-#define VMFS_INODE_BLK_COUNT      0x100
+#define VMFS_INODE_BLK_COUNT      0x140
 
 #define VMFS_INODE_MAGIC  0x10c00001
 struct vmfs_inode_raw {

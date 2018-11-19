@@ -35,7 +35,7 @@
 #endif
 
 #if VMFS6_DEBUG == 1
-#define dprintf(fmt, ...) printf("VMFS6@%s(%d):" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define dprintf(fmt, ...) printf("[%s]VMFS6@%s(%d):" fmt, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);
 #else
 #define dprintf(fmt, ...)	do{}while(0);
 #endif
