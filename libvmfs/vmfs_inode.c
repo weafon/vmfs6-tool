@@ -368,7 +368,7 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
          u_int pb_index;
          u_int sub_index;
 
-         blk_per_pb = fs->pbc->bmh.data_size / sizeof(uint32_t);
+         blk_per_pb = fs->pbc->bmh.data_size / sizeof(uint64_t);
          blk_index = pos / inode->blk_size;
 
          pb_index  = blk_index / blk_per_pb;

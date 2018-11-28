@@ -27,8 +27,12 @@ enum vmfs_block_type {
    VMFS_BLK_TYPE_PB,     /* Pointer Block */
    VMFS_BLK_TYPE_FD,     /* File Descriptor */
    VMFS_BLK_TYPE_PB2,
+   VMFS_BLK_TYPE_UNKNOWN,  /* unknown */
+   VMFS_BLK_TYPE_LFB,    /* Large File Block */   
    VMFS_BLK_TYPE_MAX,
 };
+
+#define LARGE_BLOCK_SIZE 0X20000000
 
 #define VMFS_BLK_SHIFT(mask) __builtin_ctzl(mask)
 #define VMFS_BLK_VALUE(blk_id, mask) (((blk_id) & (mask)) >> VMFS_BLK_SHIFT(mask))
@@ -55,6 +59,7 @@ enum vmfs_block_type {
 #define VMFS_BLK_FB_ITEM_VALUE_MSB_MASK  0x03fffe00UL   //0xffffffc0
 
 #define VMFS_BLK_FB_FLAGS_MASK 0x0000000000000038UL
+#define VMFS_BLK_FB_ZERO_MASK 0x0000000000000080UL
 
 /* TBZ flag specifies if the block must be zeroed. */
 #define VMFS_BLK_FB_TBZ_FLAG    4
@@ -64,6 +69,7 @@ enum vmfs_block_type {
     VMFS_BLK_FILL(VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ITEM_MSB_MASK), VMFS_BLK_FB_ITEM_VALUE_MSB_MASK))
 
 #define VMFS_BLK_FB_FLAGS(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_FLAGS_MASK)
+#define VMFS_BLK_FB_ZERO(blk_id) VMFS_BLK_VALUE(blk_id, VMFS_BLK_FB_ZERO_MASK)
 
 #define VMFS_BLK_FB_MAX_ITEM VMFS_BLK_MAX_VALUE(VMFS_BLK_FB_ITEM_VALUE_LSB_MASK | VMFS_BLK_FB_ITEM_VALUE_MSB_MASK)
 
@@ -239,5 +245,9 @@ ssize_t vmfs_block_read_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
 /* Write a piece of a file block */
 ssize_t vmfs_block_write_fb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
                             u_char *buf,size_t len);
+
+/* Read a piece of a large file block */
+ssize_t vmfs_block_read_lfb(const vmfs_fs_t *fs,uint64_t blk_id,off_t pos,
+                           u_char *buf,size_t len);
 
 #endif

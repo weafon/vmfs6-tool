@@ -233,7 +233,7 @@ static void vmfs_fuse_opendir(fuse_req_t req, fuse_ino_t ino,
 static void vmfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                               off_t off, struct fuse_file_info *fi)
 {
-	FILE* fp;
+//	FILE* fp;
    char buf[size];
    const vmfs_dirent_t *entry;
    struct stat st = {0, };

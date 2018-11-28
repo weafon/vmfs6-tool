@@ -219,6 +219,13 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
             break;
          }
 
+        /* Large File-Block */
+         case VMFS_BLK_TYPE_LFB: {
+             exp_len = m_min(len,file_size - pos);
+             res = vmfs_block_read_lfb(fs,blk_id,pos,buf,exp_len);
+             break;
+        }
+        
          /* Inline in the inode */
          case VMFS_BLK_TYPE_FD:
             if (blk_id == f->inode->id) {
