@@ -5,7 +5,7 @@
 version
 config.cache
 debugvmfs/debugvmfs
-fsck.vmfs/fsck.vmfs
-imager/imager
-vmfs-fuse/vmfs-fuse
 vmfs-lvm/vmfs-lvm
+vmfs-fuse/vmfs-fuse
+imager/imager
+fsck.vmfs/fsck.vmfs

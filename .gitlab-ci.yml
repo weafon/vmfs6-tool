@@ -1,0 +1,26 @@
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+stages:
+    - deploy
+
+.ssh_preload: &ssh_preload_define
+    stage: deploy
+    tags:
+        - docker
+    except:
+        - rc5
+    before_script:
+        - mkdir -p ~/.ssh/
+        - printf "%s\n" "$KEY200_HTTPD" > ~/.ssh/id_rsa
+        - chmod 400 ~/.ssh/id_rsa
+        - ssh-keyscan -H 10.144.1.200 > ~/.ssh/known_hosts
+
+rpmbuild_centos:
+    <<: *ssh_preload_define
+    image: 10.144.1.200:5000/kautism/docker-lib:rpmbuild
+    script:
+        - rpmbuild/build.sh
+        - ssh docker-httpd@10.144.1.200 "mkdir -p ~/rpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/"
+        - ssh docker-httpd@10.144.1.200 "mkdir -p ~/srpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/"
+        - scp dist/*.x86_64.rpm  docker-httpd@10.144.1.200:~/rpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/
+        - scp dist/*.src.rpm docker-httpd@10.144.1.200:~/srpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/
