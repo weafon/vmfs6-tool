@@ -1,7 +1,7 @@
 %define vmfs %{_builddir}/vmfs
 
 Summary: VMFS
-Name: vmfs
+Name: vmfs-tools
 Version: 1
 Release: RPM_VER
 License: GNU GENERAL PUBLIC LICENSE
