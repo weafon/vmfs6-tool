@@ -1,7 +1,7 @@
 %define vmfs %{_builddir}/vmfs
 
 Summary: VMFS
-Name: vmfs
+Name: vmfs6
 Version: 1
 Release: RPM_VER
 License: GNU GENERAL PUBLIC LICENSE
@@ -18,12 +18,17 @@ Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: x86_64
 
 %description
-Yooo
+The project is cloned from Glandium.org. More introductions can be found in https://glandium.org/projects/vmfs-tools/
+Most code is developped by Christophe Fillot <cf (at) utc.fr> and Mike Hommey <mh (at) glandium.org>.
+I cloned the project for the modification of vmfs6 supporting.
+The code in the project is only for vmfs6 for now since the format of vmfs6 changed significantly.
+It is experimental code. Only debugvmfs and vmfsfuse have been applied on a few cases.
 
 %prep
 %setup -q -c
 
 %build
+LDFLAGS=-static ./configure
 make -j
 
 %check

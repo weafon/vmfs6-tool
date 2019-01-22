@@ -22,5 +22,5 @@ rpmbuild_centos:
         - rpmbuild/build.sh
         - ssh docker-httpd@10.144.1.200 "mkdir -p ~/rpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/"
         - ssh docker-httpd@10.144.1.200 "mkdir -p ~/srpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/"
-        - scp dist/*.x86_64.rpm  docker-httpd@10.144.1.200:~/rpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/
+        - scp dist/*.x86_64.rpm docker-httpd@10.144.1.200:~/rpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/
         - scp dist/*.src.rpm docker-httpd@10.144.1.200:~/srpms/$CI_PROJECT_NAME/$CI_BUILD_REF_NAME/
