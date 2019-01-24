@@ -36,15 +36,15 @@ make -j
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/lib64
+#mkdir -p %{buildroot}/lib64
 mkdir -p %{buildroot}/sbin
-cp libreadcmd/libreadcmd.a %{buildroot}/lib64/
-cp libvmfs/libvmfs.a %{buildroot}/lib64/
-cp debugvmfs/debugvmfs %{buildroot}/sbin/
-cp vmfs-lvm/vmfs-lvm %{buildroot}/sbin/
-cp vmfs-fuse/vmfs-fuse %{buildroot}/sbin/
-cp imager/imager %{buildroot}/sbin/
-cp fsck.vmfs/fsck.vmfs %{buildroot}/sbin/
+#cp libreadcmd/libreadcmd.a %{buildroot}/lib64/
+#cp libvmfs/libvmfs.a %{buildroot}/lib64/
+#cp debugvmfs/debugvmfs %{buildroot}/sbin/
+cp vmfs-lvm/vmfs-lvm %{buildroot}/sbin/vmfs6-lvm
+cp vmfs-fuse/vmfs-fuse %{buildroot}/sbin/vmfs6-fuse
+#cp imager/imager %{buildroot}/sbin/imager
+cp fsck.vmfs/fsck.vmfs %{buildroot}/sbin/fsck.vmfs6
 
 %clean
 
