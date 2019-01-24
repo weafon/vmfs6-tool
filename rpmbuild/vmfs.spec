@@ -51,7 +51,7 @@ cp fsck.vmfs/fsck.vmfs %{buildroot}/sbin/fsck.vmfs6
 %files
 %defattr(-,root,root,-)
 /sbin/*
-/lib64/*
+#/lib64/*
 
 %changelog
 * CHANGELOG_DATE REL_USER REL_EMAIL %{version}-%{sku}-%{revision}
