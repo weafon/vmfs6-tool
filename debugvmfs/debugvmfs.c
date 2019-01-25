@@ -49,6 +49,30 @@ vmfs_## foo ##_t *vmfs_## foo ##_open_from_filespec( \
 vmfs_foo_open_from_filespec(file)
 vmfs_foo_open_from_filespec(dir)
 
+/* "vmfs_version" command */
+static int cmd_getVmfsVersion(vmfs_dir_t *base_dir,int argc,char *argv[])
+{
+	int idx = 0;
+	vmfs_volume_t* vol;
+	const vmfs_fs_t* fs = vmfs_dir_get_fs(base_dir);
+	vmfs_lvm_t *lvm = (vmfs_lvm_t *)fs->dev;
+
+	if (!lvm){
+		fprintf(stderr,"Fail to get VMFS version!");
+			return(-1);
+	};
+	if (lvm->loaded_extents != 0)
+		idx = lvm->loaded_extents - 1; // last extent
+
+	vol = lvm->extents[idx];
+	if (!vol)  {
+		fprintf(stderr,"Fail to get VMFS version!");
+			return(-1);
+	};
+	printf("VMFS version: %d\n", vol->vol_info.version);
+	return(0);
+}
+
 /* "hexdump" command */
 static int cmd_hexdump(vmfs_dir_t *base_dir,int argc,char *argv[])
 {
@@ -522,6 +546,7 @@ struct cmd {
 static int cmd_shell(vmfs_dir_t *base_dir,int argc,char *argv[]);
 
 struct cmd cmd_array[] = {
+   { "vmfs_version", "show vmfs version", cmd_getVmfsVersion },
    { "cat", "Concatenate files and print on standard output", cmd_cat },
    { "hexdump", "Hexdump files and print on standard output", cmd_hexdump },
    { "ls", "List files in specified directory", cmd_ls },
@@ -539,6 +564,7 @@ struct cmd cmd_array[] = {
    { "free_block", "Free block", cmd_free_block },
    { "show", "Display value(s) for the given variable", cmd_show },
    { "shell", "Opens a shell", cmd_shell },
+
    { NULL, NULL },
 };
 
