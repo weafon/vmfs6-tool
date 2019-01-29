@@ -216,6 +216,8 @@ vmfs_volume_t *vmfs_vol_open(const char *filename,vmfs_flags_t flags)
    if (vmfs_volinfo_read(vol) == -1)
       goto err_open;
 
+   printf("VMFS version: %d\n", vol->vol_info.version);
+
    /* We support only limited VMFS6 for now*/
    if (vol->vol_info.version != 6) {
       fprintf(stderr,"VMFS: Unsupported version %u\n",vol->vol_info.version);
