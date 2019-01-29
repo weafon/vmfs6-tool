@@ -41,6 +41,7 @@ mkdir -p %{buildroot}/sbin
 #cp libreadcmd/libreadcmd.a %{buildroot}/lib64/
 #cp libvmfs/libvmfs.a %{buildroot}/lib64/
 #cp debugvmfs/debugvmfs %{buildroot}/sbin/
+cp debugvmfs/debugvmfs %{buildroot}/sbin/debugvmfs6
 cp vmfs-lvm/vmfs-lvm %{buildroot}/sbin/vmfs6-lvm
 cp vmfs-fuse/vmfs-fuse %{buildroot}/sbin/vmfs6-fuse
 #cp imager/imager %{buildroot}/sbin/imager
