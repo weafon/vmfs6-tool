@@ -135,6 +135,11 @@ void vmfs_inode_release(vmfs_inode_t *inode);
 /* Allocate a new inode */
 int vmfs_inode_alloc(vmfs_fs_t *fs,u_int type,mode_t mode,vmfs_inode_t **inode);
 
+/*
+ * Get block ID corresponding the specified position. Double Indirecting Addressing, Pointer block
+ */
+int doubleIndirectAddressing(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id);
+
 /* 
  * Get block ID corresponding the specified position. Pointer block
  * resolution is transparently done here.

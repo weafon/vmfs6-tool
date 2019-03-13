@@ -295,6 +295,69 @@ int vmfs_inode_alloc(vmfs_fs_t *fs,u_int type,mode_t mode,vmfs_inode_t **inode)
 }
 
 /* 
+ * Get block ID corresponding the specified position. Double Indirecting Addressing, Pointer block
+ */
+int doubleIndirectAddressing(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
+{
+   const vmfs_fs_t *fs = inode->fs;
+   DECL_ALIGNED_BUFFER_WOL(buf,fs->sbc->bmh.data_size);
+
+   u_int blk_index;
+   uint32_t blk_per_extendedPb;
+   uint32_t blk_per_primary_pb;
+   uint32_t blk_per_secondary_pb;
+
+   uint64_t primary_pb_blk_id;
+   uint64_t secondary_pb_blk_id;
+
+   u_int primary_pb_index;
+   u_int primary_sub_index;
+   u_int secondary_pb_index;
+   u_int secondary_sub_index;
+
+   blk_index = pos / inode->blk_size;
+   dprintf("blk_index: %d = pos/inode->blk_size: (%ld/%ld)\n",blk_index, pos, inode->blk_size);
+
+   blk_per_primary_pb = fs->sbc->bmh.data_size / sizeof(uint64_t); // 8192
+   blk_per_secondary_pb = fs->sbc->bmh.data_size / sizeof(uint64_t); // 8192
+   blk_per_extendedPb = blk_per_primary_pb * blk_per_secondary_pb;	// 64m
+   dprintf("blk_per_extendedPb: %d\n",blk_per_extendedPb);
+
+   primary_pb_index = blk_index / blk_per_extendedPb;
+   primary_sub_index = blk_index % blk_per_extendedPb;
+   dprintf("primary_pb_index: %d, primary_sub_index: %d\n", primary_pb_index, primary_sub_index);
+
+   secondary_pb_index = primary_sub_index / blk_per_secondary_pb;
+   secondary_sub_index = primary_sub_index % blk_per_secondary_pb;
+   dprintf("secondary_pb_index: %d, secondary_sub_index: %d\n", secondary_pb_index, secondary_sub_index);
+
+   if (primary_pb_index >= VMFS_INODE_BLK_COUNT)
+	  return(-EINVAL);
+
+   primary_pb_blk_id = inode->blocks[primary_pb_index];
+   dprintf("primary_pb_blk_id: 0x%lx, \n", primary_pb_blk_id);
+
+   if (!primary_pb_blk_id)
+	  return(-EINVAL);
+
+   if (!vmfs_bitmap_get_item(fs->sbc, VMFS_BLK_SB_ENTRY(primary_pb_blk_id), VMFS_BLK_SB_ITEM(primary_pb_blk_id), buf))
+	  return(-EIO);
+   dprintf("primary_pb_blk_id: 0x%lx, \n", primary_pb_blk_id);
+
+   secondary_pb_blk_id = read_le64(buf,secondary_pb_index*sizeof(uint64_t));
+   dprintf("secondary_pb_blk_id: 0x%lx, secondary_pb_index: %d\n", secondary_pb_blk_id, secondary_pb_index);
+
+   if (!vmfs_bitmap_get_item(fs->sbc, VMFS_BLK_SB_ENTRY(secondary_pb_blk_id), VMFS_BLK_SB_ITEM(secondary_pb_blk_id), buf))
+	  return(-EIO);
+
+    *blk_id = read_le64(buf,secondary_sub_index*sizeof(uint64_t));
+    dprintf("blk_id: 0x%lx, secondary_sub_index: %d\n", *blk_id, secondary_sub_index);
+
+	return(0);
+
+}
+
+/*
  * Get block ID corresponding the specified position. Pointer block
  * resolution is transparently done here.
  */
@@ -318,7 +381,8 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
       zla -= VMFS5_ZLA_BASE;
    } else
       vmfs5_extension = 0;
-	dprintf("%s : call for type-zla %d pos %016lx\n", __FUNCTION__, zla, pos);
+
+	dprintf("%s : call for type-zla %d pos %016lx, vmfs5_extension: %d\n", __FUNCTION__, zla, pos, vmfs5_extension);
    switch(zla) {
       case VMFS_BLK_TYPE_FB:
       case VMFS_BLK_TYPE_SB:
@@ -368,35 +432,50 @@ int vmfs_inode_get_block(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_id)
 
       case VMFS_BLK_TYPE_PB:
       {
-         DECL_ALIGNED_BUFFER_WOL(buf,fs->pbc->bmh.data_size);
-         uint64_t pb_blk_id;
-         uint32_t blk_per_pb;
-         u_int pb_index;
-         u_int sub_index;
+         if (vmfs5_extension) {
+			  int err;
+              uint64_t blk_id_tmp;
 
-         blk_per_pb = fs->pbc->bmh.data_size / sizeof(uint64_t);
-         blk_index = pos / inode->blk_size;
+              // Double Indirect Addressing
+	          if ((err = doubleIndirectAddressing(inode,pos,&blk_id_tmp)) < 0)
+		      {
+		         dprintf("fail to get block 0x%lx\n", blk_id_tmp);
+		         return(err);
+		      }
+		      *blk_id = blk_id_tmp;
+		      dprintf("PB blk_id 0x%lx\n", *blk_id);
 
-         pb_index  = blk_index / blk_per_pb;
-         sub_index = blk_index % blk_per_pb;
+          } else {
+	         DECL_ALIGNED_BUFFER_WOL(buf,fs->pbc->bmh.data_size);
+	         uint64_t pb_blk_id;
+	         uint32_t blk_per_pb;
+	         u_int pb_index;
+	         u_int sub_index;
 
-         if (pb_index >= VMFS_INODE_BLK_COUNT)
-            return(-EINVAL);
+	         blk_per_pb = fs->pbc->bmh.data_size / sizeof(uint64_t);
+	         blk_index = pos / inode->blk_size;
 
-         pb_blk_id = inode->blocks[pb_index];
+	         pb_index  = blk_index / blk_per_pb;
+	         sub_index = blk_index % blk_per_pb;
 
-         if (!pb_blk_id)
-            break;
-// under vmfs6 authors seems use sbc to replace pbc file for the index of a pb file
-         if (!vmfs_bitmap_get_item(fs->sbc,
-                                   VMFS_BLK_SB_ENTRY(pb_blk_id),
-                                   VMFS_BLK_SB_ITEM(pb_blk_id),
-                                   buf))
-            return(-EIO);
-//		hexdump(buf, fs->pbc->bmh.data_size);
-         *blk_id = read_le64(buf,sub_index*sizeof(uint64_t));
-		dprintf("PB pb idx %u sub idx %u get blk_id 0x%lx\n", pb_index, sub_index, *blk_id);         
-         break;
+	         if (pb_index >= VMFS_INODE_BLK_COUNT)
+	            return(-EINVAL);
+
+	         pb_blk_id = inode->blocks[pb_index];
+
+	         if (!pb_blk_id)
+	            break;
+	// under vmfs6 authors seems use sbc to replace pbc file for the index of a pb file
+	         if (!vmfs_bitmap_get_item(fs->sbc,
+	                                   VMFS_BLK_SB_ENTRY(pb_blk_id),
+	                                   VMFS_BLK_SB_ITEM(pb_blk_id),
+	                                   buf))
+	            return(-EIO);
+	//		hexdump(buf, fs->pbc->bmh.data_size);
+	         *blk_id = read_le64(buf,sub_index*sizeof(uint64_t));
+			dprintf("PB pb idx %u sub idx %u get blk_id 0x%lx\n", pb_index, sub_index, *blk_id);
+         }
+	         break;
       }
 
       case VMFS_BLK_TYPE_FD:
