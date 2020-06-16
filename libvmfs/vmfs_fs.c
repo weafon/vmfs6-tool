@@ -3,6 +3,7 @@
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009,2012 Mike Hommey <mh@glandium.org>
  * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
+ * Copyright (C) 2020 VMware, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +68,7 @@ static int vmfs_fsinfo_read(vmfs_fs_t *fs)
 
    fsi->magic = read_le32(buf,VMFS_FSINFO_OFS_MAGIC);
 
-   if (fsi->magic != VMFS_FSINFO_MAGIC) {
+   if (fsi->magic != VMFS_FSINFO_MAGIC && fsi->magic != VMFSL_FSINFO_MAGIC) {
       fprintf(stderr,"VMFS FSInfo: invalid magic number 0x%8.8x\n",fsi->magic);
       return(-1);
    }

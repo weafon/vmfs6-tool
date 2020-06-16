@@ -3,6 +3,7 @@
  * Copyright (C) 2009 Christophe Fillot <cf@utc.fr>
  * Copyright (C) 2009 Mike Hommey <mh@glandium.org>
  * Copyright (C) 2018 Weafon Tsao <weafon.tsao@accelstor.com>
+ * Copyright (C) 2020 VMware, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@
 /* === FS Info === */
 #define VMFS_FSINFO_BASE   0x0200000
 #define VMFS_FSINFO_MAGIC  0x2fabf15e
+#define VMFSL_FSINFO_MAGIC 0x2fabf15f
 
 struct vmfs_fsinfo_raw {
    uint32_t magic;
