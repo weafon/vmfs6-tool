@@ -139,6 +139,21 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       return(-1);
    }
    dprintf("Open root dir done\n");
+
+   dprintf("open pb\n");
+   fs->pbc = vmfs_open_meta_file(root_dir, VMFS_PBC_FILENAME,
+                                 VMFS_BLK_PB_MAX_ITEM, VMFS_BLK_PB_MAX_ENTRY,
+                                 "pointer block bitmap (PBC)");
+   if (!fs->pbc)
+      return(-1);
+
+   dprintf("open pb2\n");
+   fs->pb2 = vmfs_open_meta_file(root_dir, VMFS_PB2_FILENAME,
+                                 VMFS_BLK_PB2_MAX_ITEM, VMFS_BLK_PB2_MAX_ENTRY,
+                                 "pointer 2nd block bitmap (PB2)");
+   if (!fs->pb2)
+      return(-1);
+
    if (!(fs->fbb = vmfs_bitmap_open_at(root_dir,VMFS_FBB_FILENAME))) {
       fprintf(stderr,"Unable to open file-block bitmap (FBB).\n");
       return(-1);
@@ -154,19 +169,6 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
    if (!fs->fdc)
       return(-1);
 
-   fs->pbc = vmfs_open_meta_file(root_dir, VMFS_PBC_FILENAME,
-                                 VMFS_BLK_PB_MAX_ITEM, VMFS_BLK_PB_MAX_ENTRY,
-                                 "pointer block bitmap (PBC)");
-   if (!fs->pbc)
-      return(-1);
-
-
-   dprintf("open pb2\n");
-   fs->pb2 = vmfs_open_meta_file(root_dir, VMFS_PB2_FILENAME,
-                                 VMFS_BLK_PB2_MAX_ITEM, VMFS_BLK_PB2_MAX_ENTRY,
-                                 "pointer 2nd block bitmap (PB2)");
-   if (!fs->pb2)
-      return(-1);
 
    dprintf("open sbc\n");
    fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
