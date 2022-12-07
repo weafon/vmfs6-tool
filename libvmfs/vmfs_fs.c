@@ -154,6 +154,13 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
    if (!fs->pb2)
       return(-1);
 
+   dprintf("open sbc\n");
+   fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
+                                 VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
+                                 "pointer sub bitmap (SBC)");
+   if (!fs->sbc)
+      return(-1);
+
    if (!(fs->fbb = vmfs_bitmap_open_at(root_dir,VMFS_FBB_FILENAME))) {
       fprintf(stderr,"Unable to open file-block bitmap (FBB).\n");
       return(-1);
@@ -170,12 +177,7 @@ static int vmfs_open_all_meta_files(vmfs_fs_t *fs)
       return(-1);
 
 
-   dprintf("open sbc\n");
-   fs->sbc = vmfs_open_meta_file(root_dir, VMFS_SBC_FILENAME,
-                                 VMFS_BLK_SB_MAX_ITEM, VMFS_BLK_SB_MAX_ENTRY,
-                                 "pointer sub bitmap (SBC)");
-   if (!fs->sbc)
-      return(-1);
+
    vmfs_bitmap_close(fdc);
    vmfs_dir_close(root_dir);
    return(0);
