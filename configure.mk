@@ -10,7 +10,7 @@ mandir := $$(datarootdir)/man
 
 # configure rules really start here
 $(call PKG_CONFIG_CHK,uuid,-I/usr/include/uuid,-luuid)
-$(call PKG_CONFIG_CHK,fuse,-I/usr/include/fuse,-lfuse)
+$(call PKG_CONFIG_CHK,fuse3,-I/usr/include/fuse3 -D_FILE_OFFSET_BITS=64,-lfuse3)
 $(call PATH_LOOKUP,asciidoc)
 $(call PATH_LOOKUP,xsltproc)
 
