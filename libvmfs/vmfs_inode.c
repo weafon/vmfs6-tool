@@ -84,13 +84,12 @@ static int vmfs_inode_read(vmfs_inode_t *inode,const u_char *buf)
    } else {
       dprintf("file id %d off %ld blk:\n", inode->id, VMFS_INODE_OFS_BLK_ARRAY);
       //hexdump(buf+VMFS_INODE_OFS_BLK_ARRAY,256);
+      /* A zero entry is a hole in a sparse (thin) file, not the end of the
+       * array: later entries still map data. */
       for(i=0;i<VMFS_INODE_BLK_COUNT;i++)
       {
          inode->blocks[i] = vmfs_inode_read_blk_id(buf,i);
-         if (inode->blocks[i] == 0)	      
-         	break;
-		 dprintf("%d:%016lx\n", i, inode->blocks[i]);				
-         	
+		 dprintf("%d:%016lx\n", i, inode->blocks[i]);
        }
        dprintf("-------\n");
    }
@@ -315,6 +314,7 @@ int doubleIndirectAddressing(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_i
    u_int secondary_pb_index;
    u_int secondary_sub_index;
 
+   *blk_id = 0;
    blk_index = pos / inode->blk_size;
    dprintf("blk_index: %d = pos/inode->blk_size: (%ld/%ld)\n",blk_index, pos, inode->blk_size);
 
@@ -337,8 +337,9 @@ int doubleIndirectAddressing(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_i
    primary_pb_blk_id = inode->blocks[primary_pb_index];
    dprintf("primary_pb_blk_id: 0x%lx, \n", primary_pb_blk_id);
 
+   /* A zero pointer at either level is a hole in a thin file */
    if (!primary_pb_blk_id)
-	  return(-EINVAL);
+	  return(0);
 
    if (!vmfs_bitmap_get_item(fs->sbc, VMFS_BLK_SB_ENTRY(primary_pb_blk_id), VMFS_BLK_SB_ITEM(primary_pb_blk_id), buf))
 	  return(-EIO);
@@ -346,6 +347,9 @@ int doubleIndirectAddressing(const vmfs_inode_t *inode,off_t pos,uint64_t *blk_i
 
    secondary_pb_blk_id = read_le64(buf,secondary_pb_index*sizeof(uint64_t));
    dprintf("secondary_pb_blk_id: 0x%lx, secondary_pb_index: %d\n", secondary_pb_blk_id, secondary_pb_index);
+
+   if (!secondary_pb_blk_id)
+	  return(0);
 
    if (!vmfs_bitmap_get_item(fs->sbc, VMFS_BLK_SB_ENTRY(secondary_pb_blk_id), VMFS_BLK_SB_ITEM(secondary_pb_blk_id), buf))
 	  return(-EIO);

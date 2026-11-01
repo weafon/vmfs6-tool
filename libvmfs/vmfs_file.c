@@ -190,8 +190,14 @@ ssize_t vmfs_file_pread(vmfs_file_t *f,u_char *buf,size_t len,off_t pos)
          printf("vmfs_file_read: reading block 0x%8.8x\n",blk_id);
 #endif
 
-      blk_type = VMFS_BLK_FB_TBZ(blk_id) ?
-                    VMFS_BLK_TYPE_NONE : VMFS_BLK_TYPE(blk_id);
+      blk_type = VMFS_BLK_TYPE(blk_id);
+
+      /* File blocks of lazy-zeroed thick files that were never written
+       * still hold stale data on disk.  VMFS6 marks them with bit 7
+       * instead of the VMFS5 TBZ flag. */
+      if (VMFS_BLK_FB_TBZ(blk_id) ||
+          (blk_type == VMFS_BLK_TYPE_FB && VMFS_BLK_FB_ZERO(blk_id)))
+         blk_type = VMFS_BLK_TYPE_NONE;
       dprintf("%s : call for pos %ld , got blk_id %lu (0x%lx) type %u\n", __FUNCTION__, pos, blk_id, blk_id, blk_type);
 
       switch(blk_type) {
